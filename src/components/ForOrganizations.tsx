@@ -1,4 +1,4 @@
-import { PLANS, formatPrice } from '@/lib/pricing';
+import { CLUB_DISCOVERY_POLICY, FOUNDING_OFFERS, FOUNDING_TERMS } from '@/lib/launch-offers';
 import Link from 'next/link';
 import {
   Globe,
@@ -42,12 +42,17 @@ export default function ForOrganizations() {
             For Campus Clubs
           </span>
           <h2 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-extrabold text-balance">
-            Your club page, events and inquiries. {formatPrice(PLANS.club.price)}/month.
+            Your club deserves accurate information.
           </h2>
           <p className="mt-5 text-lg text-white/70 leading-relaxed">
-            A focused first product, built into the campus discovery experience.
-            Club ownership and content are reviewed before publication. Tools
-            are in testing; no real subscription charges are enabled.
+            Public sources can be outdated. A verified club representative can help
+            keep meeting details and events accurate, rather than relying only on
+            information we find online. Club tools are in testing; paid access is not open.
+          </p>
+          <p className="mt-4 text-base text-white/80 leading-relaxed">{CLUB_DISCOVERY_POLICY}</p>
+          <p className="mt-4 text-sm font-semibold text-gold-400">
+            Founding Club preview: ${FOUNDING_OFFERS.club.amount} for {FOUNDING_OFFERS.club.days} days.
+            {' '}{FOUNDING_TERMS}
           </p>
         </div>
 
@@ -69,8 +74,11 @@ export default function ForOrganizations() {
         </div>
 
         <div className="mt-12 flex flex-col sm:flex-row items-center gap-4 justify-center">
-          <Link href="/clubs/manage" className="inline-flex items-center justify-center rounded-xl border border-white/20 px-5 py-3 text-sm font-semibold text-white/80">
-            Explore the club workspace
+          <Link href="/#pricing" className="inline-flex items-center justify-center rounded-xl border border-white/20 px-5 py-3 text-sm font-semibold text-white/80">
+            Review the founding club offer
+          </Link>
+          <Link href="/activities#report-listing" className="text-sm font-semibold text-white underline underline-offset-2">
+            Request a free listing correction
           </Link>
         </div>
       </div>

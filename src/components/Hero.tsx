@@ -12,7 +12,8 @@ import {
   Zap,
 } from 'lucide-react';
 import Logo, { CAMPUSQUEST_LOGO_SRC } from '@/components/Logo';
-import { PLANS, formatPrice } from '@/lib/pricing';
+import { PLANS } from '@/lib/pricing';
+import { FOUNDING_OFFERS } from '@/lib/launch-offers';
 
 export default function Hero() {
   return (
@@ -67,13 +68,13 @@ export default function Hero() {
 
             <p className="mt-6 text-lg lg:text-xl text-white/70 leading-relaxed max-w-xl mx-auto lg:mx-0">
               Your personalized guide to campus life. We surface the clubs,
-              events, and opportunities that match your interests — every week,
-              automatically.
+              events, and opportunities that match your interests. Explore at your
+              own pace and confirm the details before you go.
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
               <Link
-                href="/signup"
+                href="/activities"
                 className="btn-gold h-12 px-7 text-[15px] shadow-[0_10px_28px_rgba(212,175,55,0.28)]"
               >
                 Start browsing free
@@ -88,10 +89,10 @@ export default function Hero() {
             </div>
 
             <p className="mt-5 text-sm text-white/50">
-              Browse free. Planned subscriptions: {PLANS.basic.name}{' '}
-              {formatPrice(PLANS.basic.price)}/mo and {PLANS.premium.name}{' '}
-              {formatPrice(PLANS.premium.price)}/mo. Genius Mining is coming later,
-              not included in either plan.
+              Browse free. Founding {PLANS.basic.name} preview: ${FOUNDING_OFFERS.student.amount}{' '}
+              for {FOUNDING_OFFERS.student.days} days, with no automatic renewal.
+              Paid access is not open. {PLANS.premium.name} and Genius Mining come later;
+              Genius Mining is not included in either plan.
             </p>
           </div>
 

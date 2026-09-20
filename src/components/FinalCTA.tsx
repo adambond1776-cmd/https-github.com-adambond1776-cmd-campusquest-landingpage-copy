@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight, Compass } from 'lucide-react';
-import { PLANS, formatPrice } from '@/lib/pricing';
+import { FOUNDING_OFFERS } from '@/lib/launch-offers';
 
 export default function FinalCTA() {
   return (
@@ -23,14 +23,14 @@ export default function FinalCTA() {
             </h2>
 
             <p className="mt-5 text-lg text-white/70 max-w-xl mx-auto">
-              Join the Rhode Island pilot. Browse free, upgrade from{' '}
-              {formatPrice(PLANS.basic.price)}/month, and change how you
-              experience college.
+              Explore the Rhode Island pilot for free. Founding Basic is planned at{' '}
+              ${FOUNDING_OFFERS.student.amount} for {FOUNDING_OFFERS.student.days} days.
+              Paid access is not open yet; no automatic renewal is planned.
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <Link
-                href="/signup"
+                href="/activities"
                 className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl bg-white text-brand-700 font-bold text-sm transition-all duration-200 hover:bg-cream-100 hover:-translate-y-0.5 shadow-lift"
               >
                 Start browsing free

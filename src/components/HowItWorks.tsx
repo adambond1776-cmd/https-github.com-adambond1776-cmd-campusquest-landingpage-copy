@@ -5,20 +5,20 @@ const steps = [
   {
     icon: UserPlus,
     step: '01',
-    title: 'Create your profile',
-    body: 'Sign up in 30 seconds with your school email. Tell us your interests — sports, music, volunteering, gaming, anything.',
+    title: 'Explore for free',
+    body: 'Browse available activities without an account. Start with a club, event or interest you want to explore.',
   },
   {
     icon: Sliders,
     step: '02',
     title: 'Set your preferences',
-    body: 'Pick your categories and how often you want updates. You\'re in full control of what shows up in your feed.',
+    body: 'Search and filter the directory. With a connected account, you can keep your interest preferences up to date.',
   },
   {
     icon: Compass,
     step: '03',
-    title: 'Get your weekly quest',
-    body: 'Every week, we deliver a personalized feed of events, clubs, and activities that match your interests. Just show up.',
+    title: 'Take one real-world step',
+    body: 'Check the original source, confirm the details and try an activity. If a listing is wrong, tell us so we can review it.',
   },
 ];
 
@@ -29,10 +29,10 @@ export default function HowItWorks() {
         <div className="max-w-2xl mx-auto text-center">
           <span className="eyebrow">How It Works</span>
           <h2 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-extrabold text-ink text-balance">
-            Three steps to never missing out
+            Three steps toward your next activity
           </h2>
           <p className="mt-5 text-lg text-ink/60 leading-relaxed">
-            Set it up once. Get value every week.
+            Discover something useful, check the details and give it a try.
           </p>
         </div>
 
@@ -57,7 +57,7 @@ export default function HowItWorks() {
         </div>
 
         <div className="mt-14 text-center">
-          <Link href="/signup" className="btn-primary">
+          <Link href="/activities" className="btn-primary">
             Start your quest
             <ArrowRight className="w-4 h-4" />
           </Link>

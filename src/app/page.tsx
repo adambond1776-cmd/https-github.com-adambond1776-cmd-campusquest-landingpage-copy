@@ -7,6 +7,8 @@ import HowItWorks from '@/components/HowItWorks';
 import Pricing from '@/components/Pricing';
 import FinalCTA from '@/components/FinalCTA';
 import Footer from '@/components/Footer';
+import SponsorBanner from '@/components/SponsorBanner';
+import { ACTIVE_SPONSOR } from '@/lib/launch-offers';
 
 export default function LandingPage() {
   return (
@@ -14,6 +16,7 @@ export default function LandingPage() {
       <Navbar />
       <main>
         <Hero />
+        <SponsorBanner placement={ACTIVE_SPONSOR} />
         <Problem />
         <ForStudents />
         <ForOrganizations />

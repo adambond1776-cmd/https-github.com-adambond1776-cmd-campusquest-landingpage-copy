@@ -10,6 +10,8 @@ import { signedInUser } from '@/lib/session';
 import { recommendationBillingAccess } from '@/lib/billing/access';
 import ActivityFilters from '@/components/activities/ActivityFilters';
 import ReportPanel from '@/components/activities/ReportPanel';
+import FoundingOfferPrompt from '@/components/activities/FoundingOfferPrompt';
+import { CLUB_DISCOVERY_POLICY } from '@/lib/launch-offers';
 import { getActivityStore } from '@/lib/activities/store';
 import { upcomingHomeGames } from '@/lib/activities/sources/athletics';
 import { PUBLIC_STATUSES, type Activity } from '@/lib/activities/types';
@@ -137,13 +139,22 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: S
               {campusName(campusId)}
             </span>
             <h1 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-ink text-balance">
-              Everything happening on campus
+              Find your next campus activity
             </h1>
             <p className="mt-4 max-w-2xl text-base sm:text-lg text-slate-600 leading-relaxed">
               Clubs, home games, and events in one list, pulled straight from the university
               calendar, the student organization directory, and the athletics department. Every
               listing says where it came from and links back to the source.
             </p>
+            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-slate-600">
+              CampusQuest is an independent early-release service, not an official university
+              directory. Public information can be incomplete or out of date. Confirm times,
+              locations and availability with the organizer before attending.
+            </p>
+            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600">{CLUB_DISCOVERY_POLICY}</p>
+            <Link href="/contribute" className="mt-3 inline-block text-sm font-semibold text-brand-700 underline underline-offset-2">
+              Help improve the early release
+            </Link>
           </div>
         </header>
 
@@ -271,11 +282,20 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: S
                 </p>
               ) : null}
 
-              <div className="mt-12">
-                <ReportPanel campusId={campusId} options={reportOptions} />
-              </div>
+              {filtering && matches.length > 0 ? <FoundingOfferPrompt /> : null}
             </>
           )}
+          {!loadError && campusDirectoryLive(campusId) ? (
+            <div id="report-listing" className="mt-12 scroll-mt-24">
+              <ReportPanel campusId={campusId} options={reportOptions} />
+            </div>
+          ) : null}
+          {loadError ? (
+            <p id="report-listing" className="mt-6 text-sm text-slate-600">
+              Listing reports are temporarily unavailable while the directory cannot load.
+              <Link href="/contribute" className="ml-1 font-semibold text-brand-700 underline underline-offset-2">Other ways to help</Link>
+            </p>
+          ) : null}
         </div>
       </main>
       <Footer />

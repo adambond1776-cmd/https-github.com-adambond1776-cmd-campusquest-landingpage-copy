@@ -12,6 +12,8 @@ const productLinks = [
   { href: '/#organizations', label: 'For Organizations' },
   { href: '/#how-it-works', label: 'How It Works' },
   { href: '/#pricing', label: 'Pricing' },
+  { href: '/contribute', label: 'Help build CampusQuest' },
+  { href: '/sponsors', label: 'Founding sponsor program' },
   { href: '/institutions', label: 'For Schools' },
   { href: '/method', label: 'Where Genius Mining comes from' },
 ];

@@ -34,7 +34,8 @@ import {
 } from '@/app/signup/signup-actions';
 import { completeOnboarding, rememberMockSignup, type Plan, type Role } from '@/lib/auth';
 import { maskCampusEmail } from '@/lib/email-verification';
-import { CHECKOUT_LIVE, PLANS, PRICE_LOCK_COPY, STUDENT_PLANS, formatPrice } from '@/lib/pricing';
+import { CHECKOUT_LIVE, PRICE_LOCK_COPY, STUDENT_PLANS } from '@/lib/pricing';
+import { FOUNDING_OFFERS, FOUNDING_TERMS, launchPlanDisplay } from '@/lib/launch-offers';
 import { createSubmitGate, runSignupAttempt } from '@/lib/signup-attempt';
 import { SIGNUP_RETRY_MESSAGE } from '@/lib/signup-diagnostics';
 import { SIGNUP_NETWORK_TIMEOUT_MS, withTimeout } from '@/lib/timeout';
@@ -43,8 +44,7 @@ import { validateEmail } from '@/lib/validation';
 const planOptions = STUDENT_PLANS.map((plan) => ({
   id: plan.id as Plan,
   name: plan.name,
-  price: formatPrice(plan.price),
-  period: plan.price > 0 ? '/mo' : '',
+  ...launchPlanDisplay(plan.id),
   tagline: plan.shortTagline,
   badge: plan.id === 'premium' ? 'More ways to connect' : undefined,
 }));
@@ -489,9 +489,10 @@ function RoleStep({
               Organization accounts will include one editable club page, event
               publishing and private membership inquiries for{' '}
               <span className="font-bold text-gold-400">
-                {formatPrice(PLANS.club.price)}/month
+                ${FOUNDING_OFFERS.club.amount} for {FOUNDING_OFFERS.club.days} days
               </span>
-              . Checkout is not live yet — you can still create an account.
+              {' '}under the proposed founding offer. No automatic renewal.
+              Checkout is not live yet; you can still create an account.
             </p>
           </div>
         </div>
@@ -582,7 +583,7 @@ function AccountStep({
           ? 'Create your club account. Club tools are in testing; real checkout is not live yet.'
           : CHECKOUT_LIVE
             ? 'Start free. Upgrade anytime.'
-            : 'Start free. Paid plans are listed below and coming soon.'}
+            : 'Start free. Founding Basic is an offer preview, not available to purchase. Plus comes later.'}
       </p>
 
       {/* Plan selection (students only).
@@ -648,8 +649,10 @@ function AccountStep({
         </div>
       )}
 
-      {!isOrg && CHECKOUT_LIVE && (
-        <p className="mt-3 text-center text-xs leading-relaxed text-white/40">{PRICE_LOCK_COPY}</p>
+      {!isOrg && (
+        <p className="mt-3 text-center text-xs leading-relaxed text-white/60">
+          {CHECKOUT_LIVE ? PRICE_LOCK_COPY : FOUNDING_TERMS}
+        </p>
       )}
 
       {/* Org plan summary */}

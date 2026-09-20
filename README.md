@@ -1,5 +1,13 @@
 # CampusQuest
 
+## Local founding-launch preparation
+
+The local `launch/founding-customer-experience` branch adds customer-facing offer
+previews and launch guidance without connecting services or enabling charges.
+Read [Nick's launch handoff](NICK_START_HERE.md) for scope, validation, known
+baseline failure and release blockers. This preparation has not been pushed or
+deployed; the historical snapshot below is not a declaration of launch readiness.
+
 ## Current handoff snapshot
 
 This repository is the September 19, 2026 test-build copy of CampusQuest:

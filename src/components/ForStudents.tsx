@@ -8,7 +8,8 @@ import {
   User,
   ArrowRight,
 } from 'lucide-react';
-import { PLANS, formatPrice, type PlanId } from '@/lib/pricing';
+import { type PlanId } from '@/lib/pricing';
+import { FOUNDING_OFFERS } from '@/lib/launch-offers';
 import GeniusMiningTeaser from '@/components/GeniusMiningTeaser';
 
 const features: {
@@ -20,7 +21,7 @@ const features: {
   {
     icon: Search,
     title: 'Browse everything on campus',
-    body: 'See all the clubs, events, and activities happening around you. No account needed to start exploring.',
+    body: 'Explore available clubs, events, and activities around you. No account needed to start exploring.',
     tier: 'free',
   },
   {
@@ -32,14 +33,14 @@ const features: {
   {
     icon: Filter,
     title: 'Filter by what you love',
-    body: 'Music, sports, volunteering, gaming, academics, and more. Zero noise — only the things that fit you.',
-    tier: 'basic',
+    body: 'Explore music, sports, volunteering, gaming and academics. Public category and search filters are free.',
+    tier: 'free',
   },
   {
     icon: User,
     title: 'Keep your interests up to date',
     body: 'Choose your interests, rate your favorites and update your preferences as you explore. Recommendations start with what you enjoy, without an assessment.',
-    tier: 'basic',
+    tier: 'free',
   },
   {
     icon: Calendar,
@@ -63,8 +64,9 @@ const tierStyles: Record<PlanId, string> = {
 };
 
 function tierLabel(tier: PlanId): string {
-  const plan = PLANS[tier];
-  return plan.price === 0 ? 'Free' : `${formatPrice(plan.price)}/mo`;
+  if (tier === 'free') return 'Free';
+  if (tier === 'basic') return 'Basic: planned';
+  return 'Later';
 }
 
 export default function ForStudents() {
@@ -78,7 +80,9 @@ export default function ForStudents() {
           </h2>
           <p className="mt-5 text-lg text-ink/60 leading-relaxed">
             Start with your interests and discover campus activities that fit.
-            Basic is planned for your profile and saved events; Plus adds planned
+            Founding Basic is planned at ${FOUNDING_OFFERS.student.amount} for {FOUNDING_OFFERS.student.days} days
+            for saved searches and events. Existing interest preferences stay available;
+            Plus adds planned
             activity planning and sharing. Genius Mining is a future optional
             discovery experience, not a requirement for finding your next activity.
           </p>
@@ -109,7 +113,7 @@ export default function ForStudents() {
         </div>
 
         <div className="mt-12 flex flex-col sm:flex-row items-center gap-4 justify-center">
-          <Link href="/signup" className="btn-primary">
+          <Link href="/activities" className="btn-primary">
             Start browsing free
             <ArrowRight className="w-4 h-4" />
           </Link>

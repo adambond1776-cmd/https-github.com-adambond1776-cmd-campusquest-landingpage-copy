@@ -1,10 +1,9 @@
 /**
- * Every price CampusQuest quotes, in one place.
+ * Legacy monthly TEST catalog. Founding-offer presentation is in launch-offers.ts.
+ * Do not use these monthly amounts as one-time Stripe prices.
  *
- * Prices were duplicated across the pricing section, the onboarding wizard and
- * the welcome page, which is fine until the introductory period ends and three
- * files have to change together. They also have to agree with what Stripe
- * charges, and a number typed into JSX cannot be checked against anything.
+ * Numeric catalog fields stay unchanged for Nick's existing test integrations.
+ * Customer-facing descriptions are updated without granting paid access.
  */
 
 export type PlanId = 'free' | 'basic' | 'premium' | 'club';
@@ -12,7 +11,7 @@ export type PlanId = 'free' | 'basic' | 'premium' | 'club';
 export type Plan = {
   id: PlanId;
   name: string;
-  /** What a new subscriber pays today, in whole dollars per month. */
+  /** Legacy TEST monthly amount, not a live charge or a founding-pass price. */
   price: number;
   /** What this plan costs once the introductory period closes. */
   standardPrice: number;
@@ -24,22 +23,9 @@ export type Plan = {
 };
 
 /**
- * The introductory offer.
- *
- * Deliberately has no end date. Adam's read is right: this could close in three
- * months if the pilot takes off or run for a year if it does not, and a
- * countdown to a date nobody can predict is either a broken promise or a lie
- * that gets quietly extended. Two commitments replace the date, and both are
- * things we can actually keep:
- *
- *   1. Whatever you sign up at is your price for as long as your subscription
- *      stays continuously active. Cancel and come back and you pay whatever is
- *      current.
- *   2. Thirty days' notice, on this page and by email, before the introductory
- *      price closes to new sign-ups.
- *
- * Set `closesOn` when the notice actually goes out, and the countdown becomes
- * real rather than manufactured.
+ * Legacy monthly TEST offer metadata, retained for compatibility only.
+ * This is not the founding-pass offer and does not establish current customer
+ * commitments. Reconcile old billing terms before enabling any live purchases.
  */
 export const INTRO_OFFER = {
   open: true,
@@ -57,7 +43,7 @@ export const PLANS: Record<PlanId, Plan> = {
     tagline: 'Browse and discover events, clubs, and activities on campus.',
     shortTagline: 'Browse events, clubs, and activities.',
     features: [
-      'Browse all campus events',
+      'Browse available campus events',
       'View club pages and profiles',
       'Search by category or location',
       "See what's happening this week",
@@ -69,15 +55,15 @@ export const PLANS: Record<PlanId, Plan> = {
     name: 'Basic',
     price: 3,
     standardPrice: 5,
-    tagline: 'Keep a profile, save events, and filter by what you love.',
-    shortTagline: 'Profile, saved events, interest filters.',
+    tagline: 'Planned: save searches and events to return to later.',
+    shortTagline: 'Saved searches and events, planned.',
     features: [
       'Everything in Free, plus:',
-      'Personal user profile',
-      'Save events for later',
-      'Filter by your interests',
-      'Follow clubs you love',
-      'No ads, ever',
+      'Existing interest preferences stay available',
+      'Planned: save searches and events for later',
+      'Free public search and category filters',
+      'Planned: follow clubs you love',
+      'Limited, clearly labeled sponsor messages',
     ],
     cta: 'Go Basic',
   },
@@ -138,12 +124,10 @@ export function isDiscounted(plan: Plan): boolean {
 }
 
 /**
- * The promise attached to the introductory price, in the student's words.
- *
- * Kept here rather than inlined so the pricing page, the onboarding wizard and
- * any future email all make the same commitment.
+ * Compatibility exports for existing consumers. No perpetual price lock is
+ * offered by the founding-pass presentation.
  */
 export const PRICE_LOCK_COPY =
-  'Lock this price in. It stays yours for as long as your subscription stays active, even after the introductory rate ends.';
+  'Founding offers are planned as one-time purchases with no automatic renewal. Paid checkout is not open.';
 
-export const INTRO_NOTICE_COPY = `Introductory pricing while we run the Rhode Island pilot. When it ends we will say so here and by email ${INTRO_OFFER.noticeDays} days in advance, and it only affects people who sign up after that.`;
+export const INTRO_NOTICE_COPY = 'Final availability and purchase terms will be shown before checkout opens.';

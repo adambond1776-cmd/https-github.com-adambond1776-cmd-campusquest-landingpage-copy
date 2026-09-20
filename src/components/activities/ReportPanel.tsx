@@ -1,21 +1,18 @@
 'use client';
 
-import { useState } from 'react';
-import { CheckCircle2, Flag, Gift, Loader2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { CheckCircle2, Flag, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 import { reportListing } from '@/app/activities/actions';
-import {
-  MAX_FREE_MONTHS_PER_TERM,
-  REPORTS_PER_FREE_MONTH,
-  type ReportKind,
-} from '@/lib/activities/reports';
+import { type ReportKind } from '@/lib/activities/reports';
 
 type Option = { id: string; name: string };
 
 const KINDS: { value: ReportKind; label: string; hint: string }[] = [
   {
     value: 'defunct',
-    label: 'This one is dead',
-    hint: 'A club or event in the list that has stopped happening.',
+    label: 'No longer active',
+    hint: 'A listed club or facility that is no longer operating.',
   },
   {
     value: 'details_wrong',
@@ -24,8 +21,8 @@ const KINDS: { value: ReportKind; label: string; hint: string }[] = [
   },
   {
     value: 'still_active',
-    label: 'This one is alive',
-    hint: 'Confirming something is real is worth as much as reporting something dead.',
+    label: 'Still active',
+    hint: 'Share a current public source that confirms this listing is active.',
   },
   {
     value: 'missing',
@@ -42,7 +39,7 @@ export default function ReportPanel({
   options: Option[];
 }) {
   const [open, setOpen] = useState(false);
-  const [kind, setKind] = useState<ReportKind>('defunct');
+  const [kind, setKind] = useState<ReportKind>(options.length ? 'defunct' : 'missing');
   const [activityId, setActivityId] = useState('');
   const [suggestedName, setSuggestedName] = useState('');
   const [detail, setDetail] = useState('');
@@ -50,7 +47,16 @@ export default function ReportPanel({
   const [notify, setNotify] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<{ message: string; toNext: number } | null>(null);
+  const [done, setDone] = useState(false);
+  const successRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!done) return;
+    // A collapsed form can leave the viewport down in the footer. Bring the
+    // confirmation into view and announce it to keyboard/screen-reader users.
+    successRef.current?.focus({ preventScroll: true });
+    successRef.current?.scrollIntoView({ block: 'center' });
+  }, [done]);
 
   const needsListing = kind !== 'missing';
 
@@ -76,7 +82,9 @@ export default function ReportPanel({
       return;
     }
 
-    setDone({ message: result.message, toNext: result.toNextReward });
+    // The legacy server result contains test reward claims. Do not display those
+    // as a live offer; Nick owns final recognition and reward implementation.
+    setDone(true);
     setDetail('');
     setSuggestedName('');
     setActivityId('');
@@ -84,21 +92,18 @@ export default function ReportPanel({
 
   if (done) {
     return (
-      <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 sm:p-8">
+      <section ref={successRef} tabIndex={-1} aria-label="Report submitted" className="scroll-mt-24 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 sm:p-8 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
         <div className="flex gap-3">
           <CheckCircle2 className="w-6 h-6 shrink-0 text-emerald-600" />
           <div>
             <h2 className="font-extrabold text-emerald-900">Got it, thank you.</h2>
-            <p className="mt-2 text-sm text-emerald-800 leading-relaxed">{done.message}</p>
-            {done.toNext > 0 ? (
-              <p className="mt-2 text-sm text-emerald-800">
-                {done.toNext} more confirmed {done.toNext === 1 ? 'correction' : 'corrections'} and
-                your next month is free.
-              </p>
-            ) : null}
+            <p className="mt-2 text-sm text-emerald-800 leading-relaxed">
+              Your report was submitted for review. Submitting a report does not
+              confirm the correction or earn an automatic reward.
+            </p>
             <button
               type="button"
-              onClick={() => setDone(null)}
+              onClick={() => setDone(false)}
               className="mt-4 text-sm font-semibold text-emerald-800 underline underline-offset-2 hover:text-emerald-900"
             >
               Report something else
@@ -118,17 +123,14 @@ export default function ReportPanel({
             Found something wrong?
           </h2>
           <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-            This list comes from the university&rsquo;s own systems, which know which clubs are
-            registered but not which ones still meet. You do. Tell us about a club that folded, a
-            detail that is off, or something real we are missing entirely.
+            Public sources can be out of date. Tell us about a club that no longer meets,
+            a detail that is off, or a public activity we are missing. Corrections are
+            free, and no paid membership is required.
           </p>
-          <p className="mt-3 inline-flex items-start gap-2 text-sm font-medium text-brand-800">
-            <Gift className="w-4 h-4 shrink-0 mt-0.5 text-gold-600" />
-            <span>
-              {REPORTS_PER_FREE_MONTH} corrections we confirm earn you a free month, up to{' '}
-              {MAX_FREE_MONTHS_PER_TERM} a term. We credit corrections we can check, not reports we
-              cannot.
-            </span>
+          <p className="mt-3 text-sm text-brand-800">
+            Useful contributions are reviewed, not counted automatically.
+            Recognition and reward details are still being designed.{' '}
+            <Link href="/contribute" className="font-semibold underline underline-offset-2">See other ways to help</Link>.
           </p>
         </div>
 
@@ -222,7 +224,7 @@ export default function ReportPanel({
               className="w-full px-3 py-3 rounded-xl border border-cream-300 bg-white text-[15px] text-ink placeholder:text-slate-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
             />
             <p className="mt-1.5 text-xs text-slate-500">
-              Something we can check. A report we cannot verify does not earn credit.
+              Include a public source we can check. Do not include private student data or passwords.
             </p>
           </div>
 
@@ -247,8 +249,8 @@ export default function ReportPanel({
                 className="mt-0.5 w-4 h-4 rounded border-cream-400 text-brand-600 focus:ring-brand-500"
               />
               <span className="text-sm text-slate-600 leading-snug">
-                Email me when this is resolved. Without this we keep only a one-way hash of your
-                address, which means we cannot credit your account either.
+                Keep my email so the team can contact me about this report.
+                Without this, the report stores only a one-way hash of my address.
               </span>
             </label>
           </div>
