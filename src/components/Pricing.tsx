@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { Check, Sparkles, User, Star, Building2, ArrowRight, Lock } from 'lucide-react';
 import {
   CHECKOUT_LIVE,
-  INSTITUTIONAL_SEAT_PRICE,
   INTRO_NOTICE_COPY,
   PLANS,
   PRICE_LOCK_COPY,
@@ -226,12 +225,12 @@ export default function Pricing() {
         </div>
 
         <p className="mt-10 text-center text-sm text-ink/40">
-          Schools can cover Genius Mining for their students at{' '}
-          {formatPrice(INSTITUTIONAL_SEAT_PRICE)} a student.{' '}
+          Interested in helping shape future campus programs?{' '}
           <Link href="/institutions" className="font-semibold text-brand-700 hover:text-brand-800">
             Level Up Rhode Island
           </Link>{' '}
-          is selecting three founding partner institutions.
+          welcomes founding-partner conversations. Genius Mining is in development;
+          institutional availability and pricing are not a current offer.
         </p>
       </div>
     </section>

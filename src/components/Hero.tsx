@@ -88,8 +88,10 @@ export default function Hero() {
             </div>
 
             <p className="mt-5 text-sm text-white/50">
-              Browse free. Basic {formatPrice(PLANS.basic.price)}/mo. Premium{' '}
-              {formatPrice(PLANS.premium.price)}/mo with Genius Mining.
+              Browse free. Planned subscriptions: {PLANS.basic.name}{' '}
+              {formatPrice(PLANS.basic.price)}/mo and {PLANS.premium.name}{' '}
+              {formatPrice(PLANS.premium.price)}/mo. Genius Mining is coming later,
+              not included in either plan.
             </p>
           </div>
 

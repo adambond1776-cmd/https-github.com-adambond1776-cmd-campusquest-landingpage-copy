@@ -9,6 +9,10 @@ export default function GeniusMiningTeaser() {
         guided reflection on real experiences to explore how you approach challenges,
         what energizes you and new ways you could contribute on campus.
       </p>
+      <p className="mt-3 text-sm leading-relaxed text-white/80">
+        This optional experience is in development and is not included in Basic
+        or Plus. Launch timing, availability and pricing will be announced.
+      </p>
       <details className="mt-4">
         <summary className="cursor-pointer text-sm font-semibold text-gold-400">Why go beyond an interest list?</summary>
         <p className="mt-3 text-sm leading-relaxed text-white/80">
@@ -17,8 +21,7 @@ export default function GeniusMiningTeaser() {
           and discover opportunities you might not have thought to choose.
         </p>
         <p className="mt-3 text-xs leading-relaxed text-white/70">
-          In development, not part of today&apos;s interest matching. Launch timing,
-          availability and pricing will be announced. No upgrade is needed to use your current interest choices.
+          Not part of today&apos;s interest matching. No upgrade is needed to use your current interest choices.
         </p>
       </details>
     </aside>

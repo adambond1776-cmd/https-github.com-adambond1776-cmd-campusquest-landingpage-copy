@@ -3,12 +3,13 @@ import {
   Search,
   Bookmark,
   Filter,
-  Compass,
-  FileText,
-  PencilLine,
+  Calendar,
+  Share2,
+  User,
   ArrowRight,
 } from 'lucide-react';
 import { PLANS, formatPrice, type PlanId } from '@/lib/pricing';
+import GeniusMiningTeaser from '@/components/GeniusMiningTeaser';
 
 const features: {
   icon: typeof Search;
@@ -25,7 +26,7 @@ const features: {
   {
     icon: Bookmark,
     title: 'Save events for later',
-    body: "Bookmark events you're interested in and come back to them. Never lose track of that thing you wanted to go to.",
+    body: "Planned for Basic: bookmark events you're interested in and come back to them. Event saving is not enabled in the current test build.",
     tier: 'basic',
   },
   {
@@ -35,21 +36,21 @@ const features: {
     tier: 'basic',
   },
   {
-    icon: Compass,
-    title: 'Genius Mining, the full session',
-    body: 'About forty minutes of real questions about three things you handled well. It comes back with the pattern underneath them — the one you have been running without noticing.',
+    icon: User,
+    title: 'Keep your interests up to date',
+    body: 'Choose your interests, rate your favorites and update your preferences as you explore. Recommendations start with what you enjoy, without an assessment.',
+    tier: 'basic',
+  },
+  {
+    icon: Calendar,
+    title: 'Plan your next month',
+    body: 'Planned for Plus: collect the events you want to attend in a next-month activity plan. Monthly planning is not enabled in the current test build.',
     tier: 'premium',
   },
   {
-    icon: FileText,
-    title: 'A page you can hand to an advisor',
-    body: 'Your working word, the evidence for it, and where the read is thin. Printed on one page, in language an advisor can actually use in a meeting.',
-    tier: 'premium',
-  },
-  {
-    icon: PencilLine,
-    title: 'Refine it all year',
-    body: 'The profile is yours to edit. Change a line that does not sound like you, add what the questions missed, and print it again before advising week.',
+    icon: Share2,
+    title: 'Make plans with friends',
+    body: 'Planned for Plus: share selected events and send invitations through your own messaging app. Sharing is not enabled in the current test build.',
     tier: 'premium',
   },
 ];
@@ -76,11 +77,14 @@ export default function ForStudents() {
             Stop scrolling. Start showing up.
           </h2>
           <p className="mt-5 text-lg text-ink/60 leading-relaxed">
-            Browse for free. Keep a profile for the price of a coffee. Premium
-            adds Genius Mining — a guided session that names how you actually
-            think, so the rest of your decisions stop being guesses.
+            Start with your interests and discover campus activities that fit.
+            Basic is planned for your profile and saved events; Plus adds planned
+            activity planning and sharing. Genius Mining is a future optional
+            discovery experience, not a requirement for finding your next activity.
           </p>
         </div>
+
+        <GeniusMiningTeaser />
 
         <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {features.map((f) => (
@@ -109,7 +113,7 @@ export default function ForStudents() {
             Start browsing free
             <ArrowRight className="w-4 h-4" />
           </Link>
-          <span className="text-sm text-ink/50">Upgrade anytime. Cancel anytime.</span>
+          <span className="text-sm text-ink/50">Paid plans are in testing. Live checkout is not open.</span>
         </div>
       </div>
     </section>
