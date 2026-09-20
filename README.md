@@ -1,22 +1,31 @@
 # CampusQuest
 
-## Local founding-launch preparation
+## Start here: consolidated CQ Basic handoff
 
-The local `launch/founding-customer-experience` branch adds customer-facing offer
-previews and launch guidance without connecting services or enabling charges.
-Read [Nick's launch handoff](NICK_START_HERE.md) for scope, validation, known
-baseline failure and release blockers. This preparation has not been pushed or
-deployed; the historical snapshot below is not a declaration of launch readiness.
+Read [CampusQuest Basic: Nick’s Launch Handoff](NICK_START_HERE.md) first. It
+introduces the complete product without assuming prior familiarity, compares the
+prepared version with the original copy baseline, and separates working local
+features from the implementation and connections needed to launch and monetize.
 
-## Current handoff snapshot
+Adam authorized merging the prepared work into `main` in this copy repository,
+**without deployment**. Nick should use `main`; no branch reconciliation is
+required. Founding offers remain previews, no services or live charges were
+enabled, and automatic Vercel Git deployment remains disabled. Discuss proposed
+product changes and obtain deployment approval from Adam before proceeding.
+
+The handoff above takes precedence over the historical material below and
+`GO_LIVE.md` where launch scope or readiness differs.
+
+## Historical source snapshot
 
 This repository is the September 19, 2026 test-build copy of CampusQuest:
 https://github.com/adambond1776-cmd/https-github.com-adambond1776-cmd-campusquest-landingpage-copy
 
 It contains the existing application plus weighted student interests, isolated
 $3/$5 student test subscriptions, and the $49 club test workflow. Source snapshot:
-`campusquest-landingpage` commit `861363b`. Application code is unchanged from
-that verified snapshot; this copy updates repository and deployment instructions.
+`campusquest-landingpage` commit `861363b`. That describes the copy's starting
+provenance, not its current application code: subsequent founding-launch changes
+are documented in the current handoff above.
 
 - Nothing is deployed by this handoff. Automatic Vercel Git deployments are
   disabled in this copy's configuration. Do not link it to the original
