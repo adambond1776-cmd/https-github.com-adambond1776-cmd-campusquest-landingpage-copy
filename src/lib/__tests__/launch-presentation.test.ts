@@ -6,11 +6,14 @@ import Pricing from '@/components/Pricing';
 import SponsorBanner from '@/components/SponsorBanner';
 import LaunchContact from '@/components/LaunchContact';
 import FoundingOfferPrompt from '@/components/activities/FoundingOfferPrompt';
+import ContributePage from '@/app/contribute/page';
+import SponsorsPage from '@/app/sponsors/page';
 import {
   ACTIVE_SPONSOR,
   CLUB_DISCOVERY_POLICY,
   FOUNDING_OFFERS,
   FOUNDING_TERMS,
+  SPONSOR_POLICY,
   launchPlanDisplay,
   safeSponsorHref,
 } from '@/lib/launch-offers';
@@ -30,7 +33,7 @@ describe('founding offer presentation, not payment configuration', () => {
     expect(FOUNDING_OFFERS.student).toEqual({ amount: 5, days: 60, optionalMonthly: 3 });
     expect(FOUNDING_OFFERS.club).toEqual({ amount: 99, days: 90, optionalMonthly: 49 });
     expect(FOUNDING_TERMS).toContain('No automatic renewal');
-    expect(FOUNDING_TERMS).toContain('separate choice');
+    expect(FOUNDING_TERMS).toContain('full founding period');
   });
 
   it.each([
@@ -48,7 +51,8 @@ describe('founding offer presentation, not payment configuration', () => {
     expect(html).toContain('href="/activities"');
     expect(html).toContain('One payment for 60 days');
     expect(html).toContain('One payment for 90 days');
-    expect(html).toContain('no payment is collected here');
+    expect(html).toContain('this page cannot accept payment');
+    expect(html).toContain('Nothing starts automatically');
     expect(html).not.toContain('href="/billing');
     expect(html).not.toContain('No ads, ever');
     expect(html).not.toContain('Price locked');
@@ -56,16 +60,16 @@ describe('founding offer presentation, not payment configuration', () => {
 
   it('does not imply a filtered search was saved or provide a fake save control', () => {
     const html = renderToStaticMarkup(createElement(FoundingOfferPrompt));
-    expect(html).toContain('this search has not been saved to an account');
-    expect(html).toContain('bookmark this filtered page');
+    expect(html.replace(/\s+/g, ' ')).toContain('has not been saved to your account');
+    expect(html).toContain('Bookmark this page in your browser');
     expect(html).toContain('href="/#pricing"');
     expect(html).not.toContain('<button');
   });
 
   it('keeps corrections free and paid placement separate from discovery', () => {
-    expect(CLUB_DISCOVERY_POLICY).toContain('whether or not they pay');
-    expect(CLUB_DISCOVERY_POLICY).toContain('corrections are free');
-    expect(CLUB_DISCOVERY_POLICY).toContain('do not buy a higher position');
+    expect(CLUB_DISCOVERY_POLICY).toContain('do not have to pay to appear');
+    expect(CLUB_DISCOVERY_POLICY).toContain('Corrections are always free');
+    expect(CLUB_DISCOVERY_POLICY).toContain('does not move a club higher');
   });
 
   it('leaves recognition undecided and does not display legacy reward promises', () => {
@@ -74,9 +78,35 @@ describe('founding offer presentation, not payment configuration', () => {
     expect(report).not.toContain('REPORTS_PER_FREE_MONTH');
     expect(report).not.toContain('done.message');
     expect(report).not.toContain('next month is free');
-    expect(contribute).toContain('Payment alone does not establish leadership');
-    expect(contribute).toContain('not finalized or');
+    expect(contribute).toContain('Credit will reflect verified contributions');
+    expect(contribute).toContain('final titles, requirements');
     expect(contribute).toContain('You do not need a paid membership');
+  });
+
+  it('keeps the revised recognition invitation evidence-based and non-guaranteed', () => {
+    const html = renderToStaticMarkup(createElement(ContributePage)).replace(/\s+/g, ' ');
+    expect(html).toContain('Credit will reflect verified contributions');
+    expect(html).toContain('not simply whether someone purchased a membership');
+    expect(html).toContain('still being developed, not guaranteed');
+    expect(html).toContain('not an accredited qualification');
+    expect(html).toContain('Do not disrupt the service, probe security');
+  });
+
+  it('preserves the bounded sponsor deliverables in the friendlier wording', () => {
+    const html = renderToStaticMarkup(createElement(SponsorsPage)).replace(/\s+/g, ' ');
+    expect(html).toContain('$2,500');
+    expect(html).toContain('50 student passes, each lasting 60 days');
+    expect(html).toContain('5 club administration places for 90 days, starting at program launch');
+    expect(html).toContain('does not guarantee signups');
+    expect(html).toContain('No student contact list');
+    expect(html).toContain('Reports will include only measures we can verify');
+  });
+
+  it('retains limited labeled advertising without a perpetual ad-free promise', () => {
+    expect(SPONSOR_POLICY).toContain('clearly labeled sponsor messages');
+    expect(SPONSOR_POLICY).toContain('including on paid plans');
+    expect(SPONSOR_POLICY).toContain('No pop-ups');
+    expect(SPONSOR_POLICY).toContain('does not change organic recommendations');
   });
 });
 
@@ -118,7 +148,7 @@ describe('honest contact availability', () => {
     'does not send users to an unconfigured or invalid contact: %s', (value) => {
       vi.stubEnv('CQ_PARTNERSHIP_EMAIL', value);
       const html = renderToStaticMarkup(createElement(LaunchContact, { subject: 'Feedback', label: 'Draft email' }));
-      expect(html).toContain('No request has been');
+      expect(html.replace(/\s+/g, ' ')).toContain('Nothing has been submitted');
       expect(html).not.toContain('mailto:');
     },
   );

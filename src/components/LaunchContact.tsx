@@ -7,8 +7,8 @@ export default function LaunchContact({ subject, label }: { subject: string; lab
   if (!email || !/^[^\s@?&#]+@[^\s@?&#]+\.[^\s@?&#]+$/.test(email)) {
     return (
       <p className="rounded-xl border border-cream-300 bg-white p-4 text-sm text-ink/70">
-        Direct email contact is not enabled in this preview. No request has been
-        submitted. The launch team will publish a working contact route before opening this program.
+        We are still setting up the contact mailbox for this program. Nothing has
+        been submitted from this page yet. A working contact option will appear before the program opens.
       </p>
     );
   }

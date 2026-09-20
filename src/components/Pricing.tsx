@@ -14,23 +14,23 @@ export default function Pricing() {
     {
       name: 'Free discovery',
       amount: 0,
-      period: 'No purchase required',
-      description: 'Find a reason to show up. Start exploring without an account.',
-      features: ['Browse available clubs and activities', 'Search by category and location', 'Open the original listing source', 'Request a listing correction for free'],
+      period: 'Free to explore',
+      description: 'See what is happening and find one thing worth trying. No account required.',
+      features: ['Browse available clubs, events and activities', 'Search by category and location', 'Check details with the original source', 'Send a listing correction for free'],
     },
     {
       name: 'Founding Basic',
       amount: student.amount,
       period: `One payment for ${student.days} days`,
-      description: 'Planned: keep the searches and activities you want to return to.',
-      features: ['Free discovery stays free', 'Planned: saved searches and events', 'Existing interest preferences stay available', 'Help shape the early student experience'],
+      description: 'Planned: return to the searches and activities that caught your interest.',
+      features: ['Everything in free discovery', 'Planned: save searches and activities', 'Keep your interests up to date', 'Help us improve the early experience'],
     },
     {
       name: 'Founding Club',
       amount: club.amount,
       period: `One payment for ${club.days} days`,
-      description: 'Planned: give a verified representative control of the club page.',
-      features: ['Editable club information', 'Publish, update and cancel events', 'Organized membership inquiries', 'Owner verification and content review'],
+      description: 'Planned: tools for a verified representative to keep club information current.',
+      features: ['Edit club information and meeting details', 'Publish, update and cancel events', 'Keep membership inquiries organized', 'Verified ownership and reviewed content'],
     },
   ];
 
@@ -43,8 +43,8 @@ export default function Pricing() {
             Start free. Help shape what comes next.
           </h2>
           <p className="mt-5 text-lg text-ink/60 leading-relaxed">
-            A simple introduction to CampusQuest, without a surprise subscription.
-            Paid features are being prepared; browse free while we finish the launch.
+            Explore campus life for free. When the founding offers open, one payment
+            will cover the full period with no automatic renewal.
           </p>
           <p className="mt-4 text-sm font-semibold text-brand-800">{LAUNCH_AVAILABILITY}</p>
         </div>
@@ -83,10 +83,10 @@ export default function Pricing() {
         <div className="mt-6 rounded-2xl border border-cream-200 bg-cream-50 p-6">
           <p className="font-bold text-ink">{FOUNDING_TERMS}</p>
           <p className="mt-2 text-sm leading-relaxed text-ink/70">
-            After the founding period, the proposed optional rates are ${student.optionalMonthly}/month
-            for Basic and ${club.optionalMonthly}/month for club tools. You would choose separately
-            whether to continue; these are not charges scheduled by joining the founding offer.
-            Final purchase and refund terms will be shown before checkout opens.
+            When the founding period ends, you can stop or choose a new plan.
+            The proposed ongoing rates are ${student.optionalMonthly}/month for Basic and{' '}
+            ${club.optionalMonthly}/month for club tools. Nothing starts automatically.
+            Final purchase and refund terms will appear before checkout opens.
           </p>
           <p className="mt-3 text-sm leading-relaxed text-ink/70">{CLUB_DISCOVERY_POLICY}</p>
           <p className="mt-3 text-sm leading-relaxed text-ink/70">{SPONSOR_POLICY}</p>
@@ -95,8 +95,8 @@ export default function Pricing() {
         <div className="mt-8 flex items-start gap-3 text-sm text-ink/65">
           <Sparkles aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" />
           <p>
-            Plus activity planning and sharing come later. Genius Mining remains in development,
-            separate from Basic and Plus; its availability and pricing are not a current offer.
+            Plus activity planning and sharing will come later. Genius Mining is also
+            in development and is separate from Basic and Plus. It is not part of these offers.
             {' '}<Link href="/contribute" className="font-semibold text-brand-700 underline underline-offset-2">Help improve CampusQuest</Link>
             {' '}or{' '}<Link href="/sponsors" className="font-semibold text-brand-700 underline underline-offset-2">explore the founding sponsor program</Link>.
           </p>

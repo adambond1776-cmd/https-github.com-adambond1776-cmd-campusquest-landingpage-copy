@@ -98,8 +98,8 @@ export default function ReportPanel({
           <div>
             <h2 className="font-extrabold text-emerald-900">Got it, thank you.</h2>
             <p className="mt-2 text-sm text-emerald-800 leading-relaxed">
-              Your report was submitted for review. Submitting a report does not
-              confirm the correction or earn an automatic reward.
+              Your report is in the review queue. We will check it before changing
+              the listing or recording it as a verified contribution.
             </p>
             <button
               type="button"
@@ -123,13 +123,13 @@ export default function ReportPanel({
             Found something wrong?
           </h2>
           <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-            Public sources can be out of date. Tell us about a club that no longer meets,
-            a detail that is off, or a public activity we are missing. Corrections are
-            free, and no paid membership is required.
+            Tell us about a club that no longer meets, a detail that is wrong or
+            an activity we are missing. Corrections are free, and you do not need
+            a paid membership to submit one.
           </p>
           <p className="mt-3 text-sm text-brand-800">
-            Useful contributions are reviewed, not counted automatically.
-            Recognition and reward details are still being designed.{' '}
+            We review useful contributions before recording credit.
+            Recognition details are still being designed.{' '}
             <Link href="/contribute" className="font-semibold underline underline-offset-2">See other ways to help</Link>.
           </p>
         </div>

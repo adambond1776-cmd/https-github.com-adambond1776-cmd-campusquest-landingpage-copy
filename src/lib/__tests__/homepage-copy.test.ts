@@ -33,6 +33,6 @@ describe('homepage Genius Mining positioning', () => {
     const pricing = component('Pricing');
     expect(pricing).not.toContain('INSTITUTIONAL_SEAT_PRICE');
     expect(pricing).not.toContain('Schools can cover Genius Mining');
-    expect(pricing).toContain('not a current offer');
+    expect(pricing).toContain('It is not part of these offers');
   });
 });

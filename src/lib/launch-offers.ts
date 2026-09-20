@@ -12,16 +12,16 @@ export const FOUNDING_OFFERS = {
 } as const;
 
 export const FOUNDING_TERMS =
-  'One payment. No automatic renewal. Any later subscription requires a separate choice.';
+  'One payment covers the full founding period. No automatic renewal.';
 
 export const LAUNCH_AVAILABILITY =
-  'Offer preview. Paid access is not open and no payment is collected here.';
+  'Preview only. Paid access is not open yet, and this page cannot accept payment.';
 
 export const CLUB_DISCOVERY_POLICY =
-  'Eligible clubs and their public activities can appear whether or not they pay. Listing corrections are free; paid tools do not buy a higher position in discovery.';
+  'Clubs do not have to pay to appear in CampusQuest. Corrections are always free, and paying for club tools does not move a club higher in discovery.';
 
 export const SPONSOR_POLICY =
-  'Limited, clearly labeled sponsor messages may appear on homepages, including paid experiences. No pop-ups or paid changes to organic recommendations.';
+  'CampusQuest may show a small number of clearly labeled sponsor messages, including on paid plans. No pop-ups, and sponsorship does not change organic recommendations.';
 
 export function launchPlanDisplay(id: PlanId): { price: string; period: string } {
   if (id === 'free') return { price: '$0', period: '' };

@@ -45,9 +45,10 @@ export default function ForOrganizations() {
             Your club deserves accurate information.
           </h2>
           <p className="mt-5 text-lg text-white/70 leading-relaxed">
-            Public sources can be outdated. A verified club representative can help
-            keep meeting details and events accurate, rather than relying only on
-            information we find online. Club tools are in testing; paid access is not open.
+            Public information can be outdated or incomplete. A verified club
+            representative can keep meeting details and events accurate instead of
+            leaving students to rely on whatever a web search finds. Club tools are
+            still in testing, so paid access is not open yet.
           </p>
           <p className="mt-4 text-base text-white/80 leading-relaxed">{CLUB_DISCOVERY_POLICY}</p>
           <p className="mt-4 text-sm font-semibold text-gold-400">

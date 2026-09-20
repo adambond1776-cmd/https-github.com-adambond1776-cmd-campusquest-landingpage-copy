@@ -32,6 +32,18 @@ release. Nothing has been pushed, merged, deployed, connected or charged.
 | Sponsor banner | Reusable, explicitly labeled `Advertisement`, HTTPS links only, no trackers; renders nothing by default |
 | Contact availability | New pages only use an explicitly configured `CQ_PARTNERSHIP_EMAIL`; otherwise show a truthful unavailable state, not the unverified fallback mailbox |
 
+### Wording-polish follow-up
+
+The follow-up makes the student, club and sponsor copy easier to understand
+without changing offer amounts, durations or functionality. Pricing explains
+one-time access and no automatic renewal; search explains browser bookmarking
+without claiming an account save; contribution copy connects verified work to
+honest resume credit without promising certificates. Sponsor copy retains the
+defined program, limited labeled messages and no guaranteed outcomes.
+
+Unavailable purchases and unconfigured contact options remain explicit. Nick
+still owns final recognition titles, requirements, rewards and implementation.
+
 ## Start here tomorrow
 
 1. Review this branch and the baseline diff. Do not merge blindly.
@@ -107,8 +119,8 @@ npm run lint
 
 | Check | Before changes | After changes |
 | --- | --- | --- |
-| Unit/regression suite | 607 pass; 1 existing failure | 628 pass; same 1 existing failure |
-| Added launch regressions | Not present | All 21 pass |
+| Unit/regression suite | 607 pass; 1 existing failure | 631 pass; same 1 existing failure |
+| Added launch regressions | Not present | All 24 pass |
 | Production build | Pass | Pass |
 | TypeScript | Pass | Pass |
 | ESLint | Pass | Pass |
@@ -129,6 +141,14 @@ links, sponsor proposal, missing contact configuration and disabled paid signup
 options. No real account was created or email sent. No uncaught browser errors or
 horizontal overflow were observed in the checked states.
 
+After the wording-polish follow-up, the build, TypeScript, ESLint and full test
+suite were rerun. Sixteen browser checks passed across the revised pricing,
+contribution, sponsor, search and report surfaces, including no-results recovery,
+visible/focused report confirmation and disabled paid signup. Desktop and mobile
+screenshots were reviewed. These checks used a fictional local listing and a
+disconnected local report submission; no real account, email or payment was used.
+Protected integration and deployment paths remain identical to the baseline.
+
 Existing local warnings about absent `metadataBase` and smooth-scroll markup were
 observed; those global configuration details were not changed. Live integrations,
 delivery, account persistence, payments, entitlement enforcement, refund handling,
@@ -147,5 +167,5 @@ git diff e668b1c29b456200b56fbac3748c4decbbe12504...HEAD
 No production rollback or schema rollback is needed because nothing was
 deployed and no migrations were added. Before sharing, switching back to the
 unchanged `main` restores the baseline checkout. After a future merge, use a
-normal revert of the launch commit under the team's release process; do not
+normal reverts of the launch commits under the team's release process; do not
 force-push or rewrite shared history.
