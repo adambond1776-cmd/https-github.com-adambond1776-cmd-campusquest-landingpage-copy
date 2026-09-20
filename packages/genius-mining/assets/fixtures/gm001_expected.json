@@ -1,0 +1,41 @@
+{
+  "_source": "Reconstructed from GM001_Analysis_Result.pdf, analysis session 26 August 2026. D1 resolution corrected 12 Sept 2026 against the handwritten original — see _correction_notice.",
+  "_caution": "GM-001 took instrument v1.1 (5 pages, no A4, pre-CONNECTED verb set). This fixture tests the ENGINE for regression, not the current instrument. Do not treat a pass as evidence that v1.3 is validated.",
+  "_correction_notice": "Every prior version of this file asserted d1_resolution.resolution == 'UNRESOLVED', built on a memory-reconstructed tally that put SORTED on Section B instance 5. The handwritten original shows instance 5 tagged PERFORMED, not SORTED. Real tally: BUILT x2, NOTICED x1, SORTED x1, PERFORMED x1 — BUILT is the outright plurality. D1 resolves cleanly. GM-001 does not exercise the tiebreak path and was never a valid proof case for it — that path remains untested against any real participant.",
+  "participant_code": "GM-001",
+  "instrument_version": "1.1",
+  "run_at": "2026-08-26",
+  "primary_working_word": "BUILDER",
+  "confidence": "MEDIUM",
+  "secondary_pattern": {
+    "word": null,
+    "note": "SORTED was tagged once, to cleaning the car, and the C2 body report on that instance was 'nothing'."
+  },
+  "disagreement_with_self_tally": {
+    "value": false,
+    "reason": "BUILDER holds and the arithmetic is not weak here — BUILT is the clean modal verb at 2 of 5 filled instances, with no competing verb above 1. The word is also supported independently by C1 and D3."
+  },
+  "thin_spots": [
+    "A1#6",
+    "B#6",
+    "A3",
+    "C2#4",
+    "E2",
+    "E3"
+  ],
+  "_d1_note": "GM-001 is NOT a tiebreak case. Tally was BUILT x2, NOTICED x1, SORTED x1, PERFORMED x1 (instance 6 blank) — BUILT wins outright with no tie. Corrected from the prior (incorrect) memory-based reconstruction that had SORTED tied with BUILT at 2 each.",
+  "d1_resolution": {
+    "computed_verb": "BUILT",
+    "resolution": "modal",
+    "candidates": [],
+    "student_tiebreak_choice": null
+  },
+  "_assertions": {
+    "primary_working_word_must_equal": "BUILDER",
+    "confidence_must_not_be": "LOW",
+    "must_validate_against": "profile_output_contract.schema.json",
+    "d1_resolution_must_equal": "modal"
+  },
+  "_still_needed": "None. gm001_responses.json is now transcribed from the handwritten original and ready to wire into the regression test."
+}
+

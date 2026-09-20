@@ -1,0 +1,53 @@
+{
+  "name": "campusquest",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "next dev --port 43917",
+    "build": "next build",
+    "build:check": "NEXT_DIST_DIR=.next-build next build",
+    "start": "next start --port 43917",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke": "node scripts/smoke.mjs",
+    "smoke:gm": "node scripts/smoke-gm.mjs",
+    "smoke:institutions": "node scripts/smoke-institutions.mjs",
+    "og": "node scripts/generate-og-image.mjs",
+    "gm:prompts": "node packages/genius-mining/scripts/generate-prompts.mjs"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.6",
+    "@supabase/supabase-js": "^2.115.0",
+    "@types/qrcode": "^1.5.6",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "autoprefixer": "^10.5.5",
+    "lucide-react": "^1.41.0",
+    "next": "16.3.4",
+    "postcss": "^8.5.28",
+    "qrcode": "^1.5.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "resend": "^6.26.0",
+    "stripe": "^22.6.1",
+    "tailwindcss": "^3.4.19"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@types/node": "^22.20.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.4",
+    "typescript": "^5",
+    "vitest": "^5.0.0"
+  }
+}

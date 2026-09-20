@@ -1,0 +1,321 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Genius Mining Profile",
+  "description": "Output of engine 1 (analysis) plus engine 2 (recommendations). Engine 1 never sees A4. Engine 2 never sees C2, C3, E2 or E3.",
+  "type": "object",
+  "required": [
+    "participant_code",
+    "instrument_version",
+    "engine_version",
+    "model",
+    "run_at",
+    "primary_working_word",
+    "evidence",
+    "secondary_pattern",
+    "disagreement_with_self_tally",
+    "body_signal_read",
+    "confidence",
+    "thin_spots",
+    "for_the_mentor",
+    "status"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "participant_code": {
+      "type": "string",
+      "pattern": "^GM-[0-9]{3,}$"
+    },
+    "instrument_version": {
+      "type": "string"
+    },
+    "engine_version": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "run_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "primary_working_word": {
+      "type": "string",
+      "enum": [
+        "TEACHER",
+        "BUILDER",
+        "PERFORMER",
+        "ORGANIZER",
+        "CONNECTOR",
+        "ANALYST",
+        "FIXER",
+        "PROTECTOR"
+      ]
+    },
+    "evidence": {
+      "type": "string",
+      "minLength": 40
+    },
+    "secondary_pattern": {
+      "type": "object",
+      "required": [
+        "word",
+        "note"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "word": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "TEACHER",
+            "BUILDER",
+            "PERFORMER",
+            "ORGANIZER",
+            "CONNECTOR",
+            "ANALYST",
+            "FIXER",
+            "PROTECTOR",
+            null
+          ]
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "disagreement_with_self_tally": {
+      "type": "object",
+      "required": [
+        "value",
+        "reason"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "body_signal_read": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ]
+    },
+    "thin_spots": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "for_the_mentor": {
+      "type": "string"
+    },
+    "d1_resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "computed_verb",
+        "resolution"
+      ],
+      "description": "How D1 was determined. Stored separately from the student's own tiebreak choice so a thin tally is never mistaken for a clean count.",
+      "properties": {
+        "computed_verb": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "modal",
+            "tie_broken_by_C1",
+            "UNRESOLVED"
+          ]
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "student_tiebreak_choice": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Only populated when resolution is UNRESOLVED and the form asked the student to choose between the tied verbs."
+        }
+      }
+    },
+    "recommendations": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Output of engine 2. Generated from working word + A4 + pathways only.",
+      "required": [
+        "items",
+        "cross_over"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "required": [
+              "activity_id",
+              "why_this_fits",
+              "first_step"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "activity_id": {
+                "type": "string"
+              },
+              "why_this_fits": {
+                "type": "string"
+              },
+              "first_step": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "cross_over": {
+          "type": "object",
+          "required": [
+            "found"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "found": {
+              "type": "boolean"
+            },
+            "headline": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "body": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "interest_used": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "gap_noted": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "engine_version": {
+          "type": "string"
+        },
+        "run_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "returned_to_student",
+        "edited",
+        "accepted",
+        "filed"
+      ]
+    },
+    "student_edits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "original": {
+            "type": "string"
+          },
+          "revised": {
+            "type": "string"
+          },
+          "edited_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Drives the purge job. See consent_and_retention_copy.md.",
+      "properties": {
+        "membership_status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "lapsed",
+            "cancelled",
+            "purged"
+          ]
+        },
+        "lapsed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "purge_due_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "warning_7_sent_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "warning_25_sent_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "deidentified_copy_retained": {
+          "type": "boolean",
+          "description": "True once the identified record is purged and the anonymized response set has been moved to the instrument-development corpus."
+        }
+      }
+    }
+  }
+}

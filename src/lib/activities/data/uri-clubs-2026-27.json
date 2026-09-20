@@ -1,0 +1,555 @@
+{
+ "campus_id": "uri",
+ "academic_year": "2026-27",
+ "source": "URI CampusQuest Active Club Directory, FY 2026-27 (hand-compiled)",
+ "compiled": "2026-09-07",
+ "_note": "The verification overlay. The Engage feed knows which organizations are registered; this list is the human judgement about which ones are actually running. Matching a row here promotes the ingested row to verified, which is what makes it eligible for Genius Mining recommendations.",
+ "count": 109,
+ "clubs": [
+  {
+   "category": "Academic & Professional",
+   "name": "American Society of Landscape Architecture URI (ASLA)",
+   "description": "Academic and professional community for students interested in landscape architecture, design, planning, and related careers."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "Animal & Veterinary Science Club (AVS)",
+   "description": "Academic and career community for students interested in animal science, veterinary science, and related fields."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "Economic Student Association",
+   "description": "Student community for economics interests, academic discussion, career exploration, and peer networking."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "Environmental and Natural Resource Economics Student Association (ENRESA)",
+   "description": "Community for students interested in environmental and natural-resource economics, connecting academic interests with discussion, learning, and professional growth."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "Geology Club",
+   "description": "Community for students interested in geology, earth science, field learning, and related careers."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "Human Development and Family Science Club",
+   "description": "Community for students interested in human development and family science to connect, explore careers, and learn beyond the classroom."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "Kinesiology Club",
+   "description": "Academic and professional community for students interested in kinesiology, exercise science, health, and related careers."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "Marine Science Society",
+   "description": "Community for students interested in marine science, oceans, research, and related academic or career opportunities."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "Mock Trial Club",
+   "description": "Competitive academic club for students interested in law, courtroom advocacy, public speaking, and case preparation."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "Music Therapy Club",
+   "description": "Community for students interested in music therapy, its professional field, and the use of music in health and wellbeing."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "National Society of Black Engineers (NSBE)",
+   "description": "Professional and academic community supporting Black engineering students through networking, development, and peer connection."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "Neuroscience Club",
+   "description": "Academic community for students interested in neuroscience, brain science, research, and related careers."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "Pre-Dental Club",
+   "description": "Pre-professional community for students considering dentistry, dental school, and related healthcare careers."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "Public Relations Student Society of America (PRSSA)",
+   "description": "Professional organization for students interested in public relations, communications, networking, and career development."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "Society for Women in Computing",
+   "description": "Professional and peer community supporting women interested in computing, technology, and related careers."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "URI Student Speech Language Hearing Association (URISSLHA)",
+   "description": "Pre-professional and academic community for students interested in speech-language pathology, audiology, and communication sciences."
+  },
+  {
+   "category": "Academic & Professional",
+   "name": "Women in STEM",
+   "description": "Community supporting women interested in science, technology, engineering, and mathematics through connection and professional growth."
+  },
+  {
+   "category": "Arts & Creativity",
+   "name": "Alima International Dance Association",
+   "description": "International dance organization connecting students through cultural dance, performance, and community."
+  },
+  {
+   "category": "Arts & Creativity",
+   "name": "Chamber Music",
+   "description": "Student music group centered on small-ensemble classical performance and collaborative musicianship."
+  },
+  {
+   "category": "Arts & Creativity",
+   "name": "Club Dance",
+   "description": "Student dance community for learning, practicing, and performing dance with peers."
+  },
+  {
+   "category": "Arts & Creativity",
+   "name": "Creative Writers Coalition",
+   "description": "Community for student writers to share work, practice writing, and build creativity with other writers."
+  },
+  {
+   "category": "Arts & Creativity",
+   "name": "Electronic Music Association (EMA)",
+   "description": "Student community for electronic music, DJing, production, performance, and music culture."
+  },
+  {
+   "category": "Arts & Creativity",
+   "name": "Musicians Guild",
+   "description": "Community for student musicians to connect, perform, collaborate, and participate in live-music activities."
+  },
+  {
+   "category": "Arts & Creativity",
+   "name": "Photography Club",
+   "description": "Community for student photographers to practice photography, share work, and connect around visual creativity."
+  },
+  {
+   "category": "Arts & Creativity",
+   "name": "Rhody Drag & Makeup Club",
+   "description": "Creative community for students interested in drag, makeup artistry, performance, and self- expression."
+  },
+  {
+   "category": "Arts & Creativity",
+   "name": "Rhody Rhapsodies",
+   "description": "Student vocal performance group centered on singing, ensemble performance, and music community."
+  },
+  {
+   "category": "Arts & Creativity",
+   "name": "Rhody Ridiculousness",
+   "description": "URI improv troupe where students practice short-form improvisation, comedy, teamwork, and live performance."
+  },
+  {
+   "category": "Arts & Creativity",
+   "name": "Rhody Round-Up Linedancing",
+   "description": "Line-dancing club for students interested in learning dances, staying active, and socializing through music and movement."
+  },
+  {
+   "category": "Arts & Creativity",
+   "name": "Social Dance Club",
+   "description": "Social dance community for students interested in learning and practicing partner and group dance styles."
+  },
+  {
+   "category": "Arts & Creativity",
+   "name": "URI Dance Company",
+   "description": "Dance performance community for students interested in choreography, training, and live performance."
+  },
+  {
+   "category": "Civic & Advocacy",
+   "name": "Young Democratic Socialists of America (YDSA)",
+   "description": "Political and advocacy organization for students interested in democratic socialist ideas, organizing, and civic engagement."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "African Student Association (ASO)",
+   "description": "Student community celebrating African cultures, identity, connection, and campus engagement."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "Asian Student Association (ASA)",
+   "description": "Student community celebrating Asian cultures, identities, traditions, and campus connection."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "Black Student Union (BSU)",
+   "description": "Student organization building community, advocacy, leadership, and cultural programming for Black students and allies."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "Brothers On a New Direction (BOND)",
+   "description": "Student community focused on brotherhood, mentorship, leadership, support, and positive campus engagement."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "Cape Verdean Student Association",
+   "description": "Cultural organization celebrating Cape Verdean heritage and building community through student connection and cultural programming."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "Collegiate Recovery Program (CRP)",
+   "description": "Student organization focused on the interests, community, and campus involvement reflected in Collegiate Recovery Program (CRP)."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "Dominican Alliance",
+   "description": "Cultural organization celebrating Dominican heritage, community, and student connection."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "Filipino Student Association",
+   "description": "Cultural organization celebrating Filipino heritage, community, traditions, and student connection."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "Latinx Student Association (LSA)",
+   "description": "Student community celebrating Latinx cultures and identities through community, cultural programming, and campus involvement."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "Middle Eastern Student Association (MESA)",
+   "description": "Cultural organization connecting students around Middle Eastern cultures, heritage, community, and campus programming."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "Multicultural Unity and Student Involvement Council (MUSIC)",
+   "description": "Council connecting multicultural and social-change student organizations and supporting collaborative cultural and educational programming."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "Powerful Independent Notoriously Knowledgeable Women (PINK)",
+   "description": "Student community focused on connection, empowerment, leadership, and support among women."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "Rhody F1rst",
+   "description": "Student-led community supporting first-generation students through connection, peer support, mentorship, and campus belonging."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "South Asian Student Association (SASA)",
+   "description": "Cultural community celebrating South Asian heritage through events, dance, advocacy, and student connection."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "Student Veterans Organization (SVO)",
+   "description": "Community and support organization for student veterans and military-connected students."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "The Rhody Exchange",
+   "description": "Student organization focused on the interests, community, and campus involvement reflected in The Rhody Exchange."
+  },
+  {
+   "category": "Culture & Community",
+   "name": "Uhuru Sasa",
+   "description": "Student cultural and community organization centered on Black identity, heritage, connection, and campus engagement."
+  },
+  {
+   "category": "Environment & Outdoors",
+   "name": "Northwoods Hiking & Conservation Club",
+   "description": "Outdoor community for students interested in hiking, nature, conservation, and exploring the outdoors."
+  },
+  {
+   "category": "Environment & Outdoors",
+   "name": "Outing Club",
+   "description": "Outdoor recreation club for students interested in trips, adventure, and spending time outside."
+  },
+  {
+   "category": "Environment & Outdoors",
+   "name": "Rhody Bikes",
+   "description": "Cycling community for students interested in bikes, riding, recreation, and bike-related campus connection."
+  },
+  {
+   "category": "Environment & Outdoors",
+   "name": "Student Action for Sustainability (SAS)",
+   "description": "Student sustainability organization focused on environmental awareness, action, and campus sustainability initiatives."
+  },
+  {
+   "category": "Environment & Outdoors",
+   "name": "Surfrider Foundation",
+   "description": "Student environmental group focused on coastal stewardship, ocean protection, beach cleanups, and sustainability."
+  },
+  {
+   "category": "Environment & Outdoors",
+   "name": "The Garden",
+   "description": "Student organization centered on gardening, plants, growing food, and hands-on environmental community activities."
+  },
+  {
+   "category": "Faith & Spirituality",
+   "name": "Chabad",
+   "description": "Jewish student community centered on religious life, community, tradition, and student connection."
+  },
+  {
+   "category": "Faith & Spirituality",
+   "name": "Hillel",
+   "description": "Jewish student community offering social, cultural, religious, service, leadership, and community- building opportunities."
+  },
+  {
+   "category": "Faith & Spirituality",
+   "name": "Influence Campus Ministries",
+   "description": "Christian campus ministry community focused on faith, fellowship, spiritual growth, and student connection."
+  },
+  {
+   "category": "Faith & Spirituality",
+   "name": "Muslim Student Association (MSA)",
+   "description": "Muslim student community supporting faith, fellowship, cultural connection, education, and campus community."
+  },
+  {
+   "category": "Faith & Spirituality",
+   "name": "Pentecost Students and Associates (PENSA)",
+   "description": "Pentecostal Christian student community for worship, fellowship, faith development, and campus connection."
+  },
+  {
+   "category": "Faith & Spirituality",
+   "name": "Rhody Catholic Organization",
+   "description": "Catholic student community for faith, fellowship, worship, service, and campus connection."
+  },
+  {
+   "category": "Faith & Spirituality",
+   "name": "Rhody Christian Fellowship",
+   "description": "Christian student community centered on faith, fellowship, spiritual growth, and campus connection."
+  },
+  {
+   "category": "Faith & Spirituality",
+   "name": "Sankofa Campus Ministry",
+   "description": "Campus ministry community centered on Christian faith, fellowship, and spiritual support."
+  },
+  {
+   "category": "Faith & Spirituality",
+   "name": "Sojourn Collegiate Ministry",
+   "description": "Christian collegiate ministry community for worship, fellowship, spiritual growth, and student connection."
+  },
+  {
+   "category": "Gaming & Hobbies",
+   "name": "Anime Club",
+   "description": "Social club for students interested in anime, related media, fandom, and community."
+  },
+  {
+   "category": "Gaming & Hobbies",
+   "name": "Billiards Club",
+   "description": "Casual recreation community for students interested in pool, billiards, friendly competition, and social play."
+  },
+  {
+   "category": "Gaming & Hobbies",
+   "name": "Chinese Games Club",
+   "description": "Social club centered on Chinese games and related cultural or recreational activities."
+  },
+  {
+   "category": "Gaming & Hobbies",
+   "name": "Gaming Club",
+   "description": "Open gaming community for students to hang out, play games, and take part in recurring competitive gaming events."
+  },
+  {
+   "category": "Gaming & Hobbies",
+   "name": "Science Fiction & Supernatural Club",
+   "description": "Social community for students interested in science fiction, fantasy, supernatural media, and fandom."
+  },
+  {
+   "category": "Health & Wellness",
+   "name": "American Heart Association Heart Club (AHA)",
+   "description": "Health and service club focused on heart-health awareness, education, and related community activities."
+  },
+  {
+   "category": "Health & Wellness",
+   "name": "Colleges Against Cancer (CAC)",
+   "description": "Student organization supporting cancer awareness, fundraising, advocacy, and community involvement."
+  },
+  {
+   "category": "Health & Wellness",
+   "name": "National Marrow Donor Program URI (NMDP)",
+   "description": "Student organization supporting marrow-donor awareness, education, and donor-registration efforts."
+  },
+  {
+   "category": "Health & Wellness",
+   "name": "National Organization for Rare Disorders URI (NORD Students for Rare)",
+   "description": "Student group raising awareness of rare diseases and connecting students around health advocacy and education."
+  },
+  {
+   "category": "Health & Wellness",
+   "name": "Rhody Stronger Together",
+   "description": "Student-led peer-support and mental-health advocacy group focused on education, connection, and reducing stigma."
+  },
+  {
+   "category": "Health & Wellness",
+   "name": "Timmy Global Health",
+   "description": "Global-health and service organization for students interested in healthcare access, service, and community impact."
+  },
+  {
+   "category": "Leadership & Service",
+   "name": "Art Helps Hearts",
+   "description": "Creative service organization connecting art-making with community support and positive impact."
+  },
+  {
+   "category": "Leadership & Service",
+   "name": "Best Buddies",
+   "description": "Service and friendship organization supporting inclusion and one-to-one connections with people with intellectual and developmental disabilities."
+  },
+  {
+   "category": "Leadership & Service",
+   "name": "Puppy Raisers Club",
+   "description": "Community for students involved or interested in raising and supporting service or assistance dogs."
+  },
+  {
+   "category": "Leadership & Service",
+   "name": "RhodyTHON",
+   "description": "Student-led fundraising and service organization centered on supporting children and families through a campus dance-marathon movement."
+  },
+  {
+   "category": "Leadership & Service",
+   "name": "Rotaract Club",
+   "description": "Service and leadership club centered on volunteering, community projects, and professional connection."
+  },
+  {
+   "category": "Leadership & Service",
+   "name": "Student Alumni Association (SAA)",
+   "description": "Student organization connecting current students with URI traditions, alumni engagement, and community-building activities."
+  },
+  {
+   "category": "Leadership & Service",
+   "name": "Student Entertainment Committee (SEC)",
+   "description": "Student programming organization that plans and produces entertainment and campus events for the URI community."
+  },
+  {
+   "category": "Leadership & Service",
+   "name": "Student Organization Leadership Consultants (SOLC)",
+   "description": "Student leadership group supporting student organizations and helping campus groups strengthen operations and involvement."
+  },
+  {
+   "category": "Leadership & Service",
+   "name": "Students Actively Volunteering and Engaging in Service (SAVES)",
+   "description": "Service organization connecting students with volunteering and community-engagement opportunities."
+  },
+  {
+   "category": "Leadership & Service",
+   "name": "URI Habitat for Humanity",
+   "description": "Service organization supporting affordable-housing and community-building efforts connected to Habitat for Humanity."
+  },
+  {
+   "category": "Media & Communication",
+   "name": "Let's Talk About It",
+   "description": "Student-run podcast and media group focused on campus life, conversation, entertainment, and student perspectives."
+  },
+  {
+   "category": "Media & Communication",
+   "name": "The Good Five Cent Cigar",
+   "description": "URI's student newspaper, offering opportunities in reporting, writing, editing, photography, and student journalism."
+  },
+  {
+   "category": "Media & Communication",
+   "name": "WRIU",
+   "description": "Student radio organization for broadcasting, music, audio production, and campus media."
+  },
+  {
+   "category": "Social & Hobbies",
+   "name": "Club Sports and Intramural Council (CSIC)",
+   "description": "Student organization bringing together people interested in club sports and intramural council (csic) and related campus activities."
+  },
+  {
+   "category": "Social & Hobbies",
+   "name": "Cooking with Rams",
+   "description": "Food-centered student community using cooking to bring students together around culture, creativity, and campus connection."
+  },
+  {
+   "category": "Social & Hobbies",
+   "name": "Crochet Club",
+   "description": "Casual craft community for students interested in crochet, making things, and meeting other creatives."
+  },
+  {
+   "category": "Social & Hobbies",
+   "name": "Italian Club",
+   "description": "Student organization bringing together people interested in italian and related campus activities."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Alpine Ski Club",
+   "description": "Student sports community for students interested in alpine ski, training, recreation, and competition."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Badminton Club",
+   "description": "Student sports community for students interested in badminton, training, recreation, and competition."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Club Baseball",
+   "description": "Student sports community for students interested in baseball, training, recreation, and competition."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Club Softball",
+   "description": "Student sports community for students interested in softball, training, recreation, and competition."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Club Track & Field",
+   "description": "Student sports community for students interested in track & field, training, recreation, and competition."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Cricket Club",
+   "description": "Student sports community for students interested in cricket, training, recreation, and competition."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Fencing Club",
+   "description": "Student sports community for students interested in fencing, training, recreation, and competition."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Golf Club",
+   "description": "Student sports community for students interested in golf, training, recreation, and competition."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Judo & Jiujitsu Club",
+   "description": "Martial-arts club for students interested in judo, jiujitsu, fitness, technique, and training."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Powerlifting Club",
+   "description": "Student sports community for students interested in powerlifting, training, recreation, and competition."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Rhody Archery",
+   "description": "Student sports community for students interested in rhody archery, training, recreation, and competition."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Rhody Rifle",
+   "description": "Student sports community for students interested in rhody rifle, training, recreation, and competition."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Roller Hockey",
+   "description": "Student sports community for students interested in roller hockey, training, recreation, and competition."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Sailing Club",
+   "description": "Sailing community for students interested in learning, practicing, and participating in sailing."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Scuba Club",
+   "description": "Club for students interested in scuba diving, underwater recreation, and diving-related activities."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Surf Club",
+   "description": "Surf community for beginners through experienced surfers, with outings, learn-to-surf opportunities, competitions, and social activities."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Trailathon Club",
+   "description": "Student sports community for students interested in trailathon, training, recreation, and competition."
+  },
+  {
+   "category": "Sports & Recreation",
+   "name": "Water Polo",
+   "description": "Student sports community for students interested in water polo, training, recreation, and competition."
+  }
+ ]
+}

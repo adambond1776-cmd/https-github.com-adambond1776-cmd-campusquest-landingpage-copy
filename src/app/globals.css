@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans text-ink bg-cream-50 antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4 {
+    @apply tracking-tight;
+  }
+
+  /* Visible focus states for keyboard navigation */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-cream-50;
+  }
+
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::selection {
+    @apply bg-brand-200 text-brand-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl
+           bg-brand-600 text-white font-semibold text-sm
+           transition-all duration-200
+           hover:bg-brand-700 hover:-translate-y-0.5
+           active:translate-y-0
+           shadow-soft hover:shadow-lift;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl
+           bg-white text-brand-700 font-semibold text-sm border border-brand-200
+           transition-all duration-200
+           hover:bg-cream-100 hover:border-brand-300 hover:-translate-y-0.5
+           active:translate-y-0;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl
+           bg-gold-500 text-brand-950 font-semibold text-sm
+           transition-all duration-200
+           hover:bg-gold-400 hover:-translate-y-0.5
+           active:translate-y-0
+           shadow-soft hover:shadow-lift;
+  }
+
+  .btn-ghost-light {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl
+           bg-white/10 text-white font-semibold text-sm border border-white/20 backdrop-blur-sm
+           transition-all duration-200
+           hover:bg-white/20 hover:-translate-y-0.5
+           active:translate-y-0;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-brand-600;
+  }
+
+  /* Long-form policy text. Kept here rather than in a plugin so the legal pages
+     stay readable without pulling typography config into the build. */
+  .legal-prose h2 {
+    @apply text-xl sm:text-2xl font-extrabold text-slate-900 mt-12 first:mt-0 mb-4 scroll-mt-24;
+  }
+
+  .legal-prose h3 {
+    @apply text-base sm:text-lg font-bold text-slate-900 mt-8 mb-3;
+  }
+
+  .legal-prose p {
+    @apply text-[15px] sm:text-base text-slate-700 leading-relaxed mb-4;
+  }
+
+  .legal-prose ul {
+    @apply list-disc pl-5 mb-5 space-y-2 marker:text-brand-400;
+  }
+
+  .legal-prose li {
+    @apply text-[15px] sm:text-base text-slate-700 leading-relaxed;
+  }
+
+  .legal-prose a {
+    @apply text-brand-700 font-medium underline underline-offset-2 hover:text-brand-800;
+  }
+
+  .legal-prose strong {
+    @apply font-bold text-slate-900;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .animate-fade-up {
+    animation: fadeUp 0.6s ease-out both;
+  }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}

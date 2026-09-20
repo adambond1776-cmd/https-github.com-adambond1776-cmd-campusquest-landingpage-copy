@@ -1,0 +1,398 @@
+{
+  "instrument": "Genius Mining Student Questionnaire",
+  "version": "1.3",
+  "date": "2026-09-01",
+  "owner": "Hidden Genius Labs LLC",
+  "supersedes": "1.2",
+  "pages": 7,
+  "sittings": 2,
+  "identifier_field": "participant_code",
+  "identifier_format": "GM-###",
+  "rules": {
+    "sequential_only": true,
+    "allow_backtrack": false,
+    "reveal_section_D_before_ABC_complete": false,
+    "support_resources_block_always_rendered": true,
+    "profile_requires_student_signoff": true,
+    "estimated_minutes": 20
+  },
+  "analysis_weighting": [
+    "C3",
+    "C1",
+    "D3",
+    "B",
+    "*"
+  ],
+  "verb_vocabulary": [
+    {
+      "verb": "EXPLAINED",
+      "means": "made it make sense to somebody else",
+      "maps_to_working_word": "TEACHER"
+    },
+    {
+      "verb": "BUILT",
+      "means": "made a thing exist that did not exist",
+      "maps_to_working_word": "BUILDER"
+    },
+    {
+      "verb": "SORTED",
+      "means": "took a mess and put it in order",
+      "maps_to_working_word": "ORGANIZER"
+    },
+    {
+      "verb": "NOTICED",
+      "means": "saw what was actually going on underneath",
+      "maps_to_working_word": "ANALYST"
+    },
+    {
+      "verb": "CONNECTED",
+      "means": "brought together people or things that were not together before",
+      "maps_to_working_word": "CONNECTOR"
+    },
+    {
+      "verb": "REPAIRED",
+      "means": "found the broken part and fixed it",
+      "maps_to_working_word": "FIXER"
+    },
+    {
+      "verb": "PROTECTED",
+      "means": "stepped in for someone being left out or hurt",
+      "maps_to_working_word": "PROTECTOR"
+    },
+    {
+      "verb": "PERFORMED",
+      "means": "made a room feel something",
+      "maps_to_working_word": "PERFORMER"
+    }
+  ],
+  "header_fields": [
+    {
+      "id": "name",
+      "type": "short_text",
+      "required": true,
+      "pii": true,
+      "sent_to_engine": false,
+      "note": "Printed on page 1 alongside the participant code. Stripped at transcription. Never enters the engine payload."
+    },
+    {
+      "id": "date",
+      "type": "date",
+      "required": true,
+      "sent_to_engine": false
+    },
+    {
+      "id": "participant_code",
+      "type": "short_text",
+      "required": true,
+      "pattern": "^GM-[0-9]{3,}$",
+      "sent_to_engine": false
+    }
+  ],
+  "sections": [
+    {
+      "id": "A",
+      "title": "INSTANCES",
+      "sitting": 1,
+      "purpose_shown_to_student": "Collecting real events. Nothing here is scored. You cannot answer it wrong.",
+      "fields": [
+        {
+          "id": "A1",
+          "type": "repeating_list",
+          "count": 6,
+          "item_type": "short_text",
+          "required": true,
+          "verb_tagged": true,
+          "sent_to_engine": true,
+          "analysis_weight": 5,
+          "prompt": "List six things you have done that took more than one day to finish and that nobody made you do. Not schoolwork. Not a job you were assigned. Not chores that needed doing anyway. Things you kept going back to because you wanted to.",
+          "note": "SIX discrete items, not a narrative. Section B tags each one and C1 selects two of them by index. Cardinality is structural - changing 6 changes B and C1."
+        },
+        {
+          "id": "A2",
+          "type": "long_text",
+          "required": true,
+          "verb_tagged": false,
+          "sent_to_engine": true,
+          "analysis_weight": 5,
+          "prompt": "Describe one time something ended and you were relieved it was over. What was it, and which specific part were you most glad to stop doing?"
+        },
+        {
+          "id": "A3",
+          "type": "long_text",
+          "required": true,
+          "verb_tagged": false,
+          "sent_to_engine": true,
+          "analysis_weight": 5,
+          "prompt": "Describe the last time you lost track of time. Where were you, what were you doing, and who else was there?"
+        },
+        {
+          "id": "A4",
+          "type": "repeating_structured_list",
+          "count": 4,
+          "required": false,
+          "verb_tagged": false,
+          "sent_to_engine": false,
+          "pii": true,
+          "gated_by": "A4_consent",
+          "generalized_in_version": "1.3",
+          "prompt": "List the things you do that get you outside, moving, or competing - a sport you play, a team you follow, a trail, a court, a gym, a field, a walk you take. For each one, note whether you do it or watch it, whether you are usually alone, with a few friends, or in a crowd, and whether it is indoors or outside.",
+          "item_fields": [
+            {
+              "id": "activity",
+              "type": "short_text"
+            },
+            {
+              "id": "mode",
+              "type": "single_select",
+              "options": [
+                "do",
+                "watch"
+              ]
+            },
+            {
+              "id": "social",
+              "type": "single_select",
+              "options": [
+                "alone",
+                "few friends",
+                "crowd"
+              ]
+            },
+            {
+              "id": "setting",
+              "type": "single_select",
+              "options": [
+                "indoors",
+                "outside"
+              ]
+            }
+          ],
+          "note": "NOT analysis data. Never sent to the engine. Not tagged in Section B. Travels with the student name ONLY when A4_consent is true. The three tags (mode / social / setting) are the three-different-asks logic. v1.3 generalized this beyond competitive sport, which is why Module F is parked."
+        },
+        {
+          "id": "A4_consent",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "sent_to_engine": false,
+          "prompt": "Campus Quest may contact me about campus activities related to what I wrote in A4.",
+          "note": "Unchecked is the default and must remain so. This is the only route by which a name leaves the form."
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "title": "TAGGING",
+      "sitting": 1,
+      "purpose_shown_to_student": "Turning your six instances into data. This is the part that makes the questionnaire work, so take it slowly.",
+      "prompt": "Go back to your six answers in A1. For each one, circle the verb below that best describes what you were actually doing - not the subject, the action. Circle one verb per instance. You will circle six verbs total, and the same verb can be circled more than once.",
+      "instruction_on_form": "Tag A1 only - do not tag A4.",
+      "fields": [
+        {
+          "id": "B",
+          "type": "repeating_single_select",
+          "count": 6,
+          "indexed_to": "A1",
+          "required": true,
+          "options": [
+            "EXPLAINED",
+            "BUILT",
+            "SORTED",
+            "NOTICED",
+            "CONNECTED",
+            "REPAIRED",
+            "PROTECTED",
+            "PERFORMED"
+          ],
+          "options_are_fixed": true,
+          "sent_to_engine": true,
+          "analysis_weight": 4,
+          "note": "One verb per A1 instance, six total, repeats allowed. FIXED vocabulary printed on the form - resolves the earlier [CONFIRM]. PERSUADED was replaced by CONNECTED in v1.3; anything holding PERSUADED is pre-1.3."
+        }
+      ]
+    },
+    {
+      "id": "C",
+      "title": "THE SECOND PASS",
+      "sitting": 2,
+      "purpose_shown_to_student": "Narrowing six instances down to the two that matter most. Read everything you have written so far before you answer anything below.",
+      "fields": [
+        {
+          "id": "C1",
+          "type": "select_exactly_two",
+          "required": true,
+          "options_source": "A1",
+          "options_are_indices": true,
+          "index_range": [
+            1,
+            6
+          ],
+          "sent_to_engine": true,
+          "analysis_weight": 2,
+          "prompt": "Of the six instances in A1, circle the two you would be willing to talk about for a full hour. Write their numbers here.",
+          "note": "Options are the student's own six A1 items, selected by number - resolves the earlier [CONFIRM]. Also feeds the D1 tiebreaker."
+        },
+        {
+          "id": "C2",
+          "type": "long_text",
+          "required": true,
+          "sent_to_engine": true,
+          "analysis_weight": 5,
+          "prompt": "Read those two again. Does your body do anything - sit up, tighten, get warm, eyes water, want to look away? Write down what happens. If nothing happens, write nothing happens. That is a real answer.",
+          "note": "'nothing happens' is a valid response and must not be treated as missing data. Confirms or complicates the reading; does not determine it."
+        },
+        {
+          "id": "C3",
+          "type": "long_text",
+          "required": true,
+          "sent_to_engine": true,
+          "analysis_weight": 1,
+          "min_chars_soft_warning": 200,
+          "prompt": "In those two instances, what were you doing minute to minute? Not the name of the activity. If someone filmed you, what would your hands, your eyes, and your mouth have been doing?",
+          "note": "HEAVIEST WEIGHT IN THE INSTRUMENT. A thin answer here degrades the whole reading. Soft-warn on short responses; never hard-block. This is the open high-priority design problem for low-effort respondents."
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "title": "THE RESULT",
+      "sitting": 2,
+      "purpose_shown_to_student": "Seeing what your own answers add up to. Do not read this section until Sections A through C are finished and written in ink.",
+      "fields": [
+        {
+          "id": "D1",
+          "type": "derived_single_select",
+          "options": [
+            "EXPLAINED",
+            "BUILT",
+            "SORTED",
+            "NOTICED",
+            "CONNECTED",
+            "REPAIRED",
+            "PROTECTED",
+            "PERFORMED"
+          ],
+          "derived_from": [
+            "B"
+          ],
+          "required": true,
+          "sent_to_engine": true,
+          "analysis_weight": 5,
+          "prompt": "Count your six circled verbs from Section B. Which verb did you circle most often? If there is a tie, use the verb attached to one of the two instances you circled in C1.",
+          "computation": "mode(B); on tie, restrict to verbs tagged on the two C1 instances",
+          "note": "MECHANICAL, not an opinion. The app can compute this. Six tags across eight verbs means the modal verb is often circled only twice - the tally is mathematically thin and ties are common. This is precisely why C3 outweighs B in the analysis order."
+        },
+        {
+          "id": "D2",
+          "type": "derived_lookup",
+          "derived_from": [
+            "D1"
+          ],
+          "lookup_table": {
+            "EXPLAINED": "TEACHER",
+            "BUILT": "BUILDER",
+            "SORTED": "ORGANIZER",
+            "NOTICED": "ANALYST",
+            "CONNECTED": "CONNECTOR",
+            "REPAIRED": "FIXER",
+            "PROTECTED": "PROTECTOR",
+            "PERFORMED": "PERFORMER"
+          },
+          "required": true,
+          "sent_to_engine": true,
+          "analysis_weight": 5,
+          "prompt": "Find that verb below and write down the word beside it.",
+          "note": "Fully deterministic from D1. Not a student choice. The app computes it; the paper form has the student read it off a printed table."
+        },
+        {
+          "id": "D3",
+          "type": "short_text",
+          "max_sentences": 1,
+          "required": true,
+          "sent_to_engine": true,
+          "analysis_weight": 3,
+          "prompt": "That word came from your own answers, not from anyone's opinion of you. It is probably about eighty percent right. Write the sentence that says it better.",
+          "shown_after": "Your sentence is the important one. The word is only a starting place.",
+          "note": "Third heaviest input. The only place the student writes in their own frame rather than picking from a list."
+        }
+      ]
+    },
+    {
+      "id": "E",
+      "title": "LAST THREE QUESTIONS",
+      "sitting": 2,
+      "purpose_shown_to_student": "Improving this questionnaire. These questions are about the form, not about you. Be blunt.",
+      "fields": [
+        {
+          "id": "E1",
+          "type": "long_text",
+          "required": false,
+          "sent_to_engine": true,
+          "analysis_weight": 5,
+          "prompt": "Which question was hardest to answer, and why?",
+          "note": "The instrument's own confusion detector. Read these before revising wording."
+        },
+        {
+          "id": "E2",
+          "type": "long_text",
+          "required": false,
+          "sent_to_engine": true,
+          "analysis_weight": 5,
+          "prompt": "Did you skip anything, or write something that is not quite true? Which one? There is no penalty for saying yes."
+        },
+        {
+          "id": "E3",
+          "type": "yes_no_with_followup",
+          "required": false,
+          "sent_to_engine": true,
+          "analysis_weight": 5,
+          "prompt": "Did you write anything today that you have not said out loud before?",
+          "followup_prompt": "If yes, which question?",
+          "followup_shown_when": true,
+          "note": "A yes here is why the support resources block is not optional."
+        }
+      ]
+    }
+  ],
+  "closing_block": {
+    "id": "what_happens_next",
+    "always_rendered": true,
+    "content_summary": [
+      "Answers become a one-page Genius Profile.",
+      "Student receives it back and may change anything on it.",
+      "Nothing is filed until the student signs off.",
+      "Name is removed before analysis; the form is tracked by participant code.",
+      "A4 is the sole exception, and only when the consent box is checked."
+    ]
+  },
+  "support_resources": {
+    "always_rendered": true,
+    "placement": "final page",
+    "may_be_collapsed": false,
+    "intro": "If anything you wrote today is sitting heavy, these people are good at this and it is free:",
+    "entries": [
+      {
+        "name": "URI Counseling Center",
+        "contact": "401-874-2288"
+      },
+      {
+        "name": "TELUS Health (after hours)",
+        "contact": "844-584-1027"
+      },
+      {
+        "name": "988 Suicide & Crisis Lifeline",
+        "contact": "call or text 988"
+      },
+      {
+        "name": "URI Police (emergency)",
+        "contact": "401-874-2121"
+      }
+    ]
+  },
+  "open_items": {
+    "C3_low_effort_prompting": "OPEN, high priority. Not addressed in v1.3.",
+    "module_F": "PARKED. A4 as generalized in v1.3 covers most of the intended ground.",
+    "verb_count": "Held at eight pending real cohort data.",
+    "multi_model_convergence": "Designed, not implemented."
+  }
+}

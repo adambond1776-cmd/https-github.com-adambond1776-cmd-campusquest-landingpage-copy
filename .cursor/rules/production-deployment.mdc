@@ -1,0 +1,13 @@
+---
+description: CampusQuest test-build handoff safety and deployment boundaries
+alwaysApply: true
+---
+
+# CampusQuest test-build copy
+
+Follow `AGENTS.md` and the current README handoff section.
+This repository is a separate test-build copy, not the production checkout.
+Never treat a GitHub push as deployment permission. Do not relink the original
+Vercel project, deploy, enable real payments or send messages without approval.
+Automatic Vercel Git deployments are disabled in this copy's `vercel.json`.
+Keep all secrets and real student data out of Git.

@@ -1,0 +1,22 @@
+{
+  "table_id": "cip_pathways",
+  "cip_edition": "[CONFIRM current NCES CIP edition before first build]",
+  "last_verified": "[DATE]",
+  "_note": "Empty on purpose. Rows are populated from pathways/uri.json adjacent_fields, which already carries the prose version of this mapping (Mechanical Engineering, Industrial Design, Computer Science, Data Science). Adding cip_code alongside those strings is the migration path. verified:false rows may be stored but MUST NOT be shown to a student. cipCoverage() reports readyForCohort:false until the edition is pinned and every working word has 3+ verified rows across all three roads.",
+  "_example_row_shape_do_not_ship": {
+    "id": "bld-mech-01",
+    "working_words": ["BUILDER", "FIXER"],
+    "domain_families": ["MECHANICAL_SYSTEMS"],
+    "cip_code": "[CIP code]",
+    "cip_title": "[official CIP program title]",
+    "student_facing_label": "plain English. Never the code.",
+    "road": "college",
+    "typical_credential": "BS",
+    "why_this_fits": "One line connecting the working word AND the domain.",
+    "first_step": "Concrete. A department, an advisor, a program page.",
+    "verified": false,
+    "source": "[how this row was confirmed]"
+  },
+  "entries": []
+}
+

@@ -1,0 +1,77 @@
+{
+  "_file": "gm001_responses.json",
+  "_purpose": "Golden test fixture input. Transcribed responses for participant GM-001, keyed by questionnaire schema field id. Paired with gm001_expected.json.",
+  "_status": "FINAL — transcribed directly from the handwritten original (photographs), 12 Sept 2026. Supersedes the provisional file and the memory-based reconstruction it was built from.",
+  "_provenance": "Transcribed directly from the five handwritten pages, Genius Mining Student Questionnaire v1.1 (Founding Cohort). Form dated by the student as Aug 24, 2026. This is now the primary source, not a reconstruction — where this file and the paper disagree, re-check the paper.",
+  "_instrument_version": "1.1",
+  "_instrument_note": "GM-001 took instrument v1.1: five pages, no A4, and the pre-CONNECTED verb set (PERSUADED was on the form but not circled). This fixture tests the ENGINE for regression. It does not validate instrument v1.3.",
+  "_pii_note": "Name removed per instrument design. No A4 on this instrument version.",
+
+  "_correction_notice": "Two changes from every prior version of this fixture, both confirmed against the original paper: (1) A1 entry 5 is 'Cleaning my car' — not a school-related entry as previously guessed; that guess was likely bleeding over from A2, which opens with the word 'School.' (2) Section B instance 5 is tagged PERFORMED, not SORTED. This changes the verb tally from a manufactured BUILT/SORTED 2-2 tie to a clean BUILT plurality (2, versus 1 each for NOTICED, SORTED, PERFORMED). D1 resolves outright. GM-001 does not exercise the tiebreak path and is not the proof case Schemas & Contracts v1.1 and Engine Spec v1.1 describe it as. See gm001_expected.json for the corrected assertion.",
+
+  "participant_code": "GM-001",
+
+  "A1": {
+    "1": "Coding a website for my uncle's business",
+    "2": "Creating a 3D print at the URI Makerspace",
+    "3": "Watching my favorite show",
+    "4": "Cleaning my room or living space",
+    "5": "Cleaning my car",
+    "6": "[LEFT BLANK BY STUDENT - row empty on the form]"
+  },
+
+  "A2": "School. Although I appreciate learning, I will not miss getting assignments in on time. I would rather use my skills learned in my career as soon as possible.",
+
+  "A3": "At my friends house playing video games. All of my closest friends.",
+
+  "B": {
+    "1": "BUILT",
+    "2": "BUILT",
+    "3": "NOTICED",
+    "4": "SORTED",
+    "5": "PERFORMED",
+    "6": null,
+    "_tally_as_submitted": "BUILT x2, NOTICED x1, SORTED x1, PERFORMED x1. Five of six instances filled; instance 6 left blank.",
+    "_row_conditions": {
+      "1": "clean",
+      "2": "clean",
+      "3": "first choice crossed out before settling",
+      "4": "first choice crossed out before settling",
+      "5": "first choice crossed out before settling",
+      "6": "left blank entirely"
+    },
+    "_verb_set": "v1.1 verb list, all eight printed. PERSUADED was present on the form but was not circled for any instance."
+  },
+
+  "C1": [4, 1],
+  "_C1_note": "Written on the form in this order: Instance 4 (cleaning the car, tagged SORTED) then Instance 1 (uncle's website, tagged BUILT).",
+
+  "C2": {
+    "4": "nothing",
+    "1": "smirk and feel happy"
+  },
+
+  "C3": {
+    "4": "listening to music, moving around and singing",
+    "1": "looked on the screen typing away"
+  },
+
+  "D1": "BUILT",
+
+  "D2": "BUILDER",
+
+  "D3": "I enjoy building and creating something new. Bringing ideas to life.",
+
+  "E1": "A1 — I do not have much time to do things I do not absolutely have to do.",
+
+  "E2": "NO",
+  "_E2_note": "Bare NO with nothing written behind it.",
+
+  "E3": "NO",
+  "_E3_note": "Bare NO, circled. Nothing on the form was new to him.",
+
+  "_before_this_is_final": [],
+
+  "_caution": "n=1, and that one participant was a motivated partner who wrote unusually rich answers. Passing this test means the engine has not regressed. It does not mean the instrument is robust."
+}
+

@@ -1,0 +1,113 @@
+{
+  "campus_id": "uri",
+  "campus_name": "University of Rhode Island",
+  "last_verified": "2026-08-27",
+  "source": "Nick's Genius Profile (verified rows); URInvolved export pending for the rest",
+  "_coverage_note": "Every working word needs at least three verified entries before a cohort runs. Currently only BUILDER is seeded. Block cohort launch until the coverage check passes.",
+  "_adjacent_fields_note": "adjacent_fields is Phase 2 groundwork - the academic directions this activity sits next to. Not shown to students in Phase 1.",
+  "entries": [
+    {
+      "id": "uri-makerspace",
+      "working_words": [
+        "BUILDER",
+        "FIXER"
+      ],
+      "scope": "on_campus",
+      "name": "MakerspaceURI",
+      "location": "Carothers Library, Room 165",
+      "category": "facility",
+      "what_it_is": "Free to every student. 3D printers, laser cutter, CNC router, 3D scanner, with SolidWorks and Rhino loaded on the machines.",
+      "how_to_join": "Walk in. Bring a project rather than a single print.",
+      "low_commitment_entry": true,
+      "adjacent_fields": [
+        "Mechanical Engineering",
+        "Industrial Design",
+        "Studio Art",
+        "Manufacturing Engineering"
+      ],
+      "verified": true,
+      "source": "Confirmed 27 August 2026"
+    },
+    {
+      "id": "uri-esports",
+      "working_words": [
+        "BUILDER",
+        "PERFORMER",
+        "CONNECTOR"
+      ],
+      "scope": "on_campus",
+      "name": "Rhody Esports Club & the Esports eLab",
+      "location": "Memorial Union, Room 317",
+      "category": "club",
+      "what_it_is": "A dedicated room with gaming PCs and real internet, plus a club that runs on Discord.",
+      "how_to_join": "Discord-first, so you can lurk before showing up in person.",
+      "low_commitment_entry": true,
+      "adjacent_fields": [
+        "Computer Science",
+        "Communication Studies",
+        "Digital Media Production"
+      ],
+      "verified": true,
+      "source": "Confirmed 27 August 2026"
+    },
+    {
+      "id": "uri-ramhacks",
+      "working_words": [
+        "BUILDER",
+        "ANALYST"
+      ],
+      "scope": "on_campus",
+      "name": "Ram Hacks",
+      "location": "Varies by event",
+      "category": "event",
+      "what_it_is": "Campus hackathon group. Twenty-four to forty-eight hours, a team, and a real thing that exists by the end.",
+      "how_to_join": "Sign up for the next event. Teams form on the day.",
+      "low_commitment_entry": false,
+      "fills_gap": "collaborative - for students whose listed projects are all solo",
+      "adjacent_fields": [
+        "Computer Science",
+        "Data Science",
+        "Entrepreneurship"
+      ],
+      "verified": true,
+      "source": "Confirmed 27 August 2026"
+    },
+    {
+      "id": "uri-innovation-labs",
+      "working_words": [
+        "BUILDER",
+        "ANALYST"
+      ],
+      "scope": "on_campus",
+      "name": "Innovation Labs",
+      "location": "Carothers Library",
+      "category": "for_credit",
+      "what_it_is": "Credit-bearing project work built around exactly this kind of making.",
+      "how_to_join": "Enroll through the course catalog.",
+      "low_commitment_entry": false,
+      "adjacent_fields": [
+        "Engineering",
+        "Business Administration",
+        "Entrepreneurship"
+      ],
+      "verified": true,
+      "source": "Confirmed 27 August 2026"
+    },
+    {
+      "id": "PLACEHOLDER",
+      "working_words": [
+        "TEACHER"
+      ],
+      "scope": "on_campus",
+      "name": "[AWAITING URInvolved EXPORT]",
+      "location": "",
+      "category": "club",
+      "what_it_is": "",
+      "how_to_join": "",
+      "low_commitment_entry": null,
+      "adjacent_fields": [],
+      "verified": false,
+      "source": "pending"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+GENIUS MINING — PROPRIETARY LICENSE
+
+Copyright (c) 2026 Hidden Genius Labs LLC. All rights reserved.
+
+1. OWNERSHIP
+
+   Hidden Genius Labs LLC ("HGL") is the sole and exclusive owner of the
+   Genius Mining instrument, engine prompts, output contract, scoring and
+   resolution logic, and all associated documentation contained in this
+   directory (collectively, the "Licensed Work"), including all copyright,
+   trade secret, and other intellectual property rights in it.
+
+   Nothing in this repository transfers, assigns, or creates joint ownership
+   of the Licensed Work. CampusQuest's use of the Licensed Work does not
+   create any ownership interest in it, and CampusQuest acquires no rights in
+   the Licensed Work other than the license granted below.
+
+2. LICENSE GRANT
+
+   HGL grants CampusQuest a non-exclusive, non-transferable, revocable
+   license to use, reproduce, and internally modify the Licensed Work solely
+   for the purpose of operating the CampusQuest web application and its
+   successor mobile application.
+
+   The grant is limited to that purpose. It does not include the right to
+   sublicense, resell, or distribute the Licensed Work as a standalone
+   product, nor to use it in any offering other than CampusQuest.
+
+3. RESERVED RIGHTS
+
+   HGL expressly reserves the right to license the Licensed Work to any
+   other party, on any terms, including to parties that compete with
+   CampusQuest. HGL reserves all rights not expressly granted in Section 2.
+
+4. DERIVED DATA
+
+   Analysis output produced by running the Licensed Work against a student's
+   responses belongs to the student and to CampusQuest as the operator of
+   record. The de-identified instrument-development corpus described in
+   `assets/copy/consent_and_retention_copy.md` is retained for the purpose of
+   improving the instrument and is owned by HGL.
+
+5. NO WARRANTY
+
+   The Licensed Work is provided "as is", without warranty of any kind. The
+   Genius Mining profile is a starting place, not a verdict, and is not a
+   psychological assessment, a clinical instrument, or academic advice.
+
+6. TERMINATION
+
+   This license terminates automatically if CampusQuest uses the Licensed
+   Work outside the scope of Section 2. On termination CampusQuest must cease
+   new analysis runs; profiles already delivered to students are unaffected.
+
+Questions about licensing terms: Hidden Genius Labs LLC.

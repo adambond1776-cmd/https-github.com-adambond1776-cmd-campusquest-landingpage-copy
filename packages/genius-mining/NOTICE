@@ -1,0 +1,30 @@
+Genius Mining
+Instrument v1.3 · Engine spec v1.2
+Copyright (c) 2026 Hidden Genius Labs LLC. All rights reserved.
+
+This directory is the licensed boundary. Everything inside it is owned by
+Hidden Genius Labs LLC and licensed to CampusQuest under ./LICENSE. Everything
+outside it is CampusQuest application code.
+
+The boundary is load-bearing, not decorative. HGL reserves the right to
+license this work to other operators, so the module must stay portable:
+
+  - No import from this package may reach outward into the host application.
+    The dependency arrow points one way only: CampusQuest imports Genius
+    Mining, never the reverse.
+  - No CampusQuest branding, copy, routing, or table names belong in here.
+    A second licensee gets this directory unchanged.
+  - Storage, email, billing, and auth are the host's concerns. This package
+    describes and decides; it does not perform I/O.
+  - The instrument, prompts, and output contract in ./assets are versioned
+    config, not source to be edited inline. Changing a question means a new
+    instrument version and a new file.
+
+Bundled assets, all HGL-owned:
+
+  assets/questionnaire_schema_v1_3.json       the instrument
+  assets/profile_output_contract.schema.json  engine output contract
+  assets/prompts/                             the two engines
+  assets/pathways/                            per-campus verified activities
+  assets/fixtures/                            test fixtures
+  assets/copy/                                student-facing consent copy

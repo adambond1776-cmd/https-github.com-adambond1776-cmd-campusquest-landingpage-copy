@@ -1,0 +1,98 @@
+{
+  "participant_code": "GM-000",
+  "instrument_version": "1.3",
+  "_comment": "FICTIONAL worked example showing the exact data shape. Not a real student. Use as the reference for transcription and for the digital form's output.",
+  "A1": [
+    {
+      "index": 1,
+      "text": "Rebuilt my grandfather's record player over winter break"
+    },
+    {
+      "index": 2,
+      "text": "Kept patching the espresso machine at the cafe I worked at"
+    },
+    {
+      "index": 3,
+      "text": "Taught my roommate calc 2 the whole spring semester"
+    },
+    {
+      "index": 4,
+      "text": "Ran the intramural soccer bracket when nobody else would"
+    },
+    {
+      "index": 5,
+      "text": "Got the campus radio transmitter working again after it died"
+    },
+    {
+      "index": 6,
+      "text": "Built a bike out of parts from three dead bikes"
+    }
+  ],
+  "A2": "Marching band. I was glad to stop having to be somewhere at 6am for something I didn't pick.",
+  "A3": "Basement of the engineering building, 2am, taking apart the transmitter with Marcus. We didn't notice the building had closed.",
+  "_A4_note": "A4 is captured but is NEVER included in the engine payload. Shown here only to make the exclusion explicit.",
+  "A4": [
+    {
+      "activity": "pickup basketball at Mackal",
+      "mode": "do",
+      "social": "few friends",
+      "setting": "indoors"
+    },
+    {
+      "activity": "follow Celtics",
+      "mode": "watch",
+      "social": "crowd",
+      "setting": "indoors"
+    },
+    {
+      "activity": "trail running at Great Swamp",
+      "mode": "do",
+      "social": "alone",
+      "setting": "outside"
+    }
+  ],
+  "A4_consent": true,
+  "_B_note": "THIS IS THE CRITICAL SHAPE. Each verb is bound to the A1 instance it tags. Do NOT flatten to a list of six words - the D1 tiebreak needs the index.",
+  "B": [
+    {
+      "instance": 1,
+      "verb": "BUILT"
+    },
+    {
+      "instance": 2,
+      "verb": "REPAIRED"
+    },
+    {
+      "instance": 3,
+      "verb": "EXPLAINED"
+    },
+    {
+      "instance": 4,
+      "verb": "SORTED"
+    },
+    {
+      "instance": 5,
+      "verb": "REPAIRED"
+    },
+    {
+      "instance": 6,
+      "verb": "BUILT"
+    }
+  ],
+  "C1": [
+    2,
+    5
+  ],
+  "C2": "Chest tightens a little thinking about the transmitter one. The record player one, nothing happens.",
+  "C3": "Hands were doing almost everything - holding a meter probe in one hand and tracing the board with the other, swapping between them constantly. Eyes went back and forth between the schematic and the board maybe fifty times, checking one against the other. Mouth was mostly shut except I kept muttering the signal path out loud to myself, and every so often I'd say 'that's not it' and start over from the power supply.",
+  "D1": "REPAIRED",
+  "D1_resolution": "tie_broken_by_C1",
+  "D2": "FIXER",
+  "D3": "I'm the person who won't leave a broken thing alone until it works again, even when nobody asked me to look at it.",
+  "E1": "C3 was hardest. I had to actually remember what my hands were doing, not what I was working on.",
+  "E2": "I skipped nothing but instance 4 is weaker than the others, I put it down to fill six.",
+  "E3": {
+    "answer": "YES",
+    "which_question": "D3"
+  }
+}

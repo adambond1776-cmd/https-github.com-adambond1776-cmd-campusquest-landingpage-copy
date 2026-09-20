@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Figuring It Out Result",
+  "description": "Separate from the Genius Mining profile contract. The two are joined by participant_code and are never merged — the profile contract sets additionalProperties false and must not be loosened to accommodate FIO.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "participant_code",
+    "instrument_version",
+    "fio_engine_version",
+    "model",
+    "run_at",
+    "domains",
+    "domain_confidence",
+    "domain_evidence_thin",
+    "status"
+  ],
+  "properties": {
+    "participant_code": { "type": "string", "pattern": "^GM-[0-9]{3,}$" },
+    "instrument_version": { "type": "string" },
+    "fio_engine_version": { "type": "string" },
+    "model": { "type": "string" },
+    "run_at": { "type": "string", "format": "date-time" },
+    "working_word_ref": {
+      "type": "string",
+      "description": "primary_working_word from the Call 1 profile. Copied, never re-derived by the FIO call."
+    },
+    "domains": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["domain_family", "raw_subject", "source_items", "weight"],
+        "properties": {
+          "domain_family": {
+            "enum": [
+              "MECHANICAL_SYSTEMS",
+              "DIGITAL_SOFTWARE",
+              "BUILT_ENVIRONMENT",
+              "LAND_ANIMALS_NATURE",
+              "HEALTH_BODY",
+              "COMMERCE_MONEY",
+              "FOOD",
+              "MEDIA_STORYTELLING",
+              "VISUAL_DESIGN",
+              "MUSIC_PERFORMANCE",
+              "LANGUAGE_TEXT",
+              "COMMUNITY_SERVICE",
+              "EDUCATION_YOUTH",
+              "SPORT_COMPETITION",
+              "LOGISTICS_OPERATIONS",
+              "SAFETY_ORDER"
+            ]
+          },
+          "raw_subject": { "type": "string", "minLength": 3 },
+          "source_items": { "type": "array", "items": { "type": "string" } },
+          "weight": { "enum": ["PRIMARY", "SECONDARY", "TRACE"] }
+        }
+      }
+    },
+    "domain_confidence": { "enum": ["HIGH", "MEDIUM", "LOW"] },
+    "domain_evidence_thin": { "type": "boolean" },
+    "thin_reason": { "type": "string" },
+    "spectator_only": { "type": "array", "items": { "type": "string" } },
+    "for_the_mentor": { "type": "string" },
+    "cip_matches": { "type": "array", "items": { "type": "object" } },
+    "status": {
+      "enum": ["draft", "returned_to_student", "edited", "accepted", "filed"]
+    },
+    "student_edits": { "type": "array", "items": { "type": "object" } }
+  }
+}
+
