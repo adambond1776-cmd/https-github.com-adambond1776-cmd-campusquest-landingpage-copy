@@ -23,9 +23,9 @@ export default function FinalCTA() {
             </h2>
 
             <p className="mt-5 text-lg text-white/70 max-w-xl mx-auto">
-              Explore the Rhode Island pilot for free. Founding Basic is planned at{' '}
-              ${FOUNDING_OFFERS.student.amount} for {FOUNDING_OFFERS.student.days} days.
-              Paid access is not open yet; no automatic renewal is planned.
+              Explore the Rhode Island pilot for free. Founding Basic is{' '}
+              ${FOUNDING_OFFERS.student.amount} for {FOUNDING_OFFERS.student.days} days,
+              with no automatic renewal. Paid access is not open yet.
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">

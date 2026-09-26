@@ -5,6 +5,7 @@ const findAuthUserByEmail = vi.fn();
 const createPendingAuthUser = vi.fn();
 const sendCampusEmailCode = vi.fn();
 const verifyCampusEmailCode = vi.fn();
+const isServerAccountVerified = vi.fn();
 const persistConfigured = vi.fn();
 const alertsConfigured = vi.fn();
 const isProductionRuntime = vi.fn();
@@ -27,6 +28,17 @@ vi.mock('@/lib/email-verification-service', async () => {
     verifyCampusEmailCode: (...args: unknown[]) => verifyCampusEmailCode(...args),
   };
 });
+
+vi.mock('@/lib/account/profile', () => ({
+  isServerAccountVerified: (...args: unknown[]) => isServerAccountVerified(...args),
+  ensureUnverifiedProfileShell: async () => undefined,
+  ensureAccountRole: vi.fn(),
+}));
+
+const sessionPrivileges = vi.fn();
+vi.mock('@/lib/session', () => ({
+  sessionPrivileges: () => sessionPrivileges(),
+}));
 
 vi.mock('@/lib/env', async () => {
   const actual = await vi.importActual<typeof import('@/lib/env')>('@/lib/env');
@@ -69,6 +81,8 @@ describe('startCampusSignup', () => {
     createPendingAuthUser.mockReset();
     sendCampusEmailCode.mockReset();
     verifyCampusEmailCode.mockReset();
+    isServerAccountVerified.mockReset();
+    sessionPrivileges.mockReset();
     persistConfigured.mockReset();
     alertsConfigured.mockReset();
     isProductionRuntime.mockReset();
@@ -79,6 +93,8 @@ describe('startCampusSignup', () => {
     alertsConfigured.mockReturnValue(true);
     isProductionRuntime.mockReturnValue(true);
     recordAge.mockResolvedValue({ ok: true, bracket: 'adult' });
+    isServerAccountVerified.mockResolvedValue(false);
+    sessionPrivileges.mockResolvedValue({ state: 'anonymous' });
     findAuthUserByEmail.mockResolvedValue(null);
     createPendingAuthUser.mockResolvedValue({ id: 'user-1' });
     sendCampusEmailCode.mockResolvedValue({
@@ -106,7 +122,8 @@ describe('startCampusSignup', () => {
     });
     expect(createPendingAuthUser).toHaveBeenCalledWith({
       email: 'ram@uri.edu',
-      metadata: { role: 'student', interests: ['Playing sports', 'Watching sports'], plan: 'free' },
+      role: 'student',
+      metadata: { interests: ['Playing sports', 'Watching sports'] },
     });
     expect(sendCampusEmailCode).toHaveBeenCalledWith({ userId: 'user-1', email: 'ram@uri.edu' });
   });
@@ -128,7 +145,8 @@ describe('startCampusSignup', () => {
     expect((await startCampusSignup({ ...input, interestPreferences })).ok).toBe(true);
     expect(createPendingAuthUser).toHaveBeenCalledWith({
       email: input.email,
-      metadata: { role: 'student', interests: ['Art, photography & film'], plan: 'free', interest_preferences: interestPreferences },
+      role: 'student',
+      metadata: { interests: ['Art, photography & film'], interest_preferences: interestPreferences },
     });
   });
 
@@ -140,7 +158,7 @@ describe('startCampusSignup', () => {
     expect(sendCampusEmailCode).not.toHaveBeenCalled();
   });
 
-  it('does not block adult signup when age postgres is missing', async () => {
+  it('a failed age write prevents completion', async () => {
     recordAge.mockResolvedValue({
       ok: false,
       message: "We couldn't complete that. Please try again.",
@@ -150,9 +168,27 @@ describe('startCampusSignup', () => {
     const { startCampusSignup } = await import('@/app/signup/signup-actions');
     const result = await startCampusSignup(input);
 
-    expect(result.ok).toBe(true);
-    expect(createPendingAuthUser).toHaveBeenCalledOnce();
-    expect(sendCampusEmailCode).toHaveBeenCalledOnce();
+    expect(result.ok).toBe(false);
+    expect(createPendingAuthUser).not.toHaveBeenCalled();
+    expect(sendCampusEmailCode).not.toHaveBeenCalled();
+  });
+
+  it('does not create a user when the auth lookup fails', async () => {
+    findAuthUserByEmail.mockRejectedValue(new Error('lookup failed'));
+    const { startCampusSignup } = await import('@/app/signup/signup-actions');
+    const result = await startCampusSignup(input);
+    expect(result.ok).toBe(false);
+    expect(createPendingAuthUser).not.toHaveBeenCalled();
+  });
+
+  it('does not treat a paid signup selection as an entitlement', async () => {
+    const { startCampusSignup } = await import('@/app/signup/signup-actions');
+    expect((await startCampusSignup({ ...input, plan: 'premium' })).ok).toBe(true);
+    expect(createPendingAuthUser).toHaveBeenCalledWith({
+      email: 'ram@uri.edu',
+      role: 'student',
+      metadata: { interests: ['Playing sports', 'Watching sports'] },
+    });
   });
 
   it('returns a send failure after creating the pending user, without claiming a code was sent', async () => {
@@ -170,11 +206,12 @@ describe('startCampusSignup', () => {
     });
   });
 
-  it('refuses an already-verified account instead of sending another signup code', async () => {
+  it('refuses an already-verified server profile instead of sending another signup code', async () => {
     findAuthUserByEmail.mockResolvedValue({
       id: 'user-1',
-      user_metadata: { campus_email_verified_at: '2026-01-01T00:00:00.000Z' },
+      user_metadata: { campus_email_verified_at: '2026-01-01T00:00:00.000Z', role: 'organization', plan: 'premium' },
     });
+    isServerAccountVerified.mockResolvedValue(true);
 
     const { startCampusSignup } = await import('@/app/signup/signup-actions');
     const result = await startCampusSignup(input);
@@ -182,6 +219,105 @@ describe('startCampusSignup', () => {
     expect(result.ok).toBe(false);
     if (result.ok) throw new Error('expected failure');
     expect(result.message).toMatch(/already exists/i);
+    expect(recordAge).not.toHaveBeenCalled();
     expect(createPendingAuthUser).not.toHaveBeenCalled();
+  });
+
+  it('does not trust metadata that claims the campus email is already verified', async () => {
+    findAuthUserByEmail.mockResolvedValue({
+      id: 'user-1',
+      user_metadata: { campus_email_verified_at: '2026-01-01T00:00:00.000Z', campus_email_pending: false },
+    });
+    isServerAccountVerified.mockResolvedValue(false);
+
+    const { startCampusSignup } = await import('@/app/signup/signup-actions');
+    const result = await startCampusSignup(input);
+
+    expect(result.ok).toBe(true);
+    expect(recordAge).not.toHaveBeenCalled();
+    expect(createPendingAuthUser).not.toHaveBeenCalled();
+    expect(sendCampusEmailCode).toHaveBeenCalledWith({ userId: 'user-1', email: 'ram@uri.edu' });
+  });
+});
+
+describe('existing account verification', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    recordAge.mockReset();
+    findAuthUserByEmail.mockReset();
+    createPendingAuthUser.mockReset();
+    sendCampusEmailCode.mockReset();
+    verifyCampusEmailCode.mockReset();
+    isServerAccountVerified.mockReset();
+    sessionPrivileges.mockReset();
+    persistConfigured.mockReset();
+    alertsConfigured.mockReset();
+    isProductionRuntime.mockReset();
+    createAdminClient.mockReset();
+    createClient.mockReset();
+    persistConfigured.mockReturnValue(true);
+    alertsConfigured.mockReturnValue(true);
+    isProductionRuntime.mockReturnValue(true);
+    createAdminClient.mockReturnValue({ auth: { admin: { updateUserById: vi.fn() } } });
+    sendCampusEmailCode.mockResolvedValue({
+      ok: true,
+      emailMasked: 'r••@uri.edu',
+      expiresInSeconds: 600,
+      resendAvailableInSeconds: 60,
+    });
+  });
+
+  it('does not prompt a profile that is already campus-verified', async () => {
+    sessionPrivileges.mockResolvedValue({
+      state: 'signed-in',
+      userId: 'user-1',
+      email: 'ram@uri.edu',
+      privileges: { verified: true, plan: 'free' },
+    });
+    const { startExistingAccountVerification } = await import('@/app/signup/signup-actions');
+    const result = await startExistingAccountVerification();
+    expect(result).toMatchObject({ ok: true, alreadyVerified: true });
+    expect(sendCampusEmailCode).not.toHaveBeenCalled();
+    expect(createPendingAuthUser).not.toHaveBeenCalled();
+  });
+
+  it('recognizes an existing unverified URI account and does not create another one', async () => {
+    sessionPrivileges.mockResolvedValue({
+      state: 'signed-in',
+      userId: 'user-1',
+      email: 'ram@uri.edu',
+      privileges: { verified: false, plan: 'free' },
+    });
+    const { startExistingAccountVerification } = await import('@/app/signup/signup-actions');
+    const result = await startExistingAccountVerification();
+    expect(result).toMatchObject({ ok: true, alreadyVerified: false, emailMasked: 'r••@uri.edu' });
+    expect(recordAge).not.toHaveBeenCalled();
+    expect(createPendingAuthUser).not.toHaveBeenCalled();
+    expect(findAuthUserByEmail).not.toHaveBeenCalled();
+    expect(sendCampusEmailCode).toHaveBeenCalledWith({ userId: 'user-1', email: 'ram@uri.edu' });
+  });
+
+  it('stamps the existing account from a valid code without rotating a session that already matches', async () => {
+    const updateUserById = vi.fn();
+    createAdminClient.mockReturnValue({ auth: { admin: { updateUserById } } });
+    sessionPrivileges.mockResolvedValue({
+      state: 'signed-in',
+      userId: 'user-1',
+      email: 'ram@uri.edu',
+      privileges: { verified: false, plan: 'free' },
+    });
+    isServerAccountVerified.mockResolvedValue(false);
+    verifyCampusEmailCode.mockResolvedValue({ ok: true, verifiedAt: '2026-09-22T00:00:00.000Z' });
+    const { verifyCampusSignupCode } = await import('@/app/signup/signup-actions');
+    const result = await verifyCampusSignupCode({ email: 'ram@uri.edu', code: '123456' });
+    expect(result).toEqual({ ok: true });
+    expect(findAuthUserByEmail).not.toHaveBeenCalled();
+    expect(createPendingAuthUser).not.toHaveBeenCalled();
+    expect(updateUserById).not.toHaveBeenCalled();
+    expect(verifyCampusEmailCode).toHaveBeenCalledWith({
+      userId: 'user-1',
+      email: 'ram@uri.edu',
+      code: '123456',
+    });
   });
 });

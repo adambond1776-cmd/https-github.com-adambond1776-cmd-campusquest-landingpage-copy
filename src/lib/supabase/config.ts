@@ -19,14 +19,17 @@ function unwrapQuoted(value: string): string {
   return trimmed;
 }
 
-function publicEnv(name: 'NEXT_PUBLIC_SUPABASE_URL' | 'NEXT_PUBLIC_SUPABASE_ANON_KEY'): string | undefined {
-  const raw = process.env[name];
+function publicEnv(raw: string | undefined): string | undefined {
   if (!raw) return undefined;
   const value = unwrapQuoted(raw);
   return value ? value : undefined;
 }
 
-export const supabaseUrl = publicEnv('NEXT_PUBLIC_SUPABASE_URL');
-export const supabaseAnonKey = publicEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+// Static property access is required. Next only inlines NEXT_PUBLIC values
+// into the browser bundle when the name is written out directly. A dynamic
+// process.env[name] lookup is empty in client components, which made login
+// look unconfigured and fall through to the development bypass.
+export const supabaseUrl = publicEnv(process.env.NEXT_PUBLIC_SUPABASE_URL);
+export const supabaseAnonKey = publicEnv(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);

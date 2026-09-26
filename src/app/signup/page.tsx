@@ -1,5 +1,7 @@
 import { signedInEmail } from '@/lib/session';
 import { redirectIfCampusEmailUnverified } from '@/lib/gate';
+import { safeReturnPath } from '@/lib/return-path';
+import { redirect } from 'next/navigation';
 import Onboarding from './onboarding-view';
 
 export default async function SignupPage({
@@ -10,20 +12,26 @@ export default async function SignupPage({
   const params = await searchParams;
   const finishFlag = Array.isArray(params.finish) ? params.finish[0] : params.finish;
   const verifyFlag = Array.isArray(params.verify) ? params.verify[0] : params.verify;
+  const nextFlag = Array.isArray(params.next) ? params.next[0] : params.next;
   const finishing = finishFlag === '1';
   const verifying = verifyFlag === '1';
+  const returnTo = safeReturnPath(nextFlag);
 
   if (finishing) {
     await redirectIfCampusEmailUnverified();
   }
 
-  const needsSessionEmail = finishing || verifying;
+  const sessionEmail = finishing || verifying ? await signedInEmail() : null;
+  if (verifying && !sessionEmail) {
+    redirect(`/login?next=${encodeURIComponent(returnTo)}`);
+  }
 
   return (
     <Onboarding
       finishing={finishing}
       verifying={verifying}
-      sessionEmail={needsSessionEmail ? await signedInEmail() : null}
+      sessionEmail={sessionEmail}
+      returnTo={returnTo}
     />
   );
 }

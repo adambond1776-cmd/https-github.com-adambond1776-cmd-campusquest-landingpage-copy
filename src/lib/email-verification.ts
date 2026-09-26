@@ -47,10 +47,9 @@ export function secondsUntil(targetMs: number, nowMs: number): number {
 }
 
 /**
- * New landing-page accounts set `campus_email_pending: true` until the 6-digit
- * code lands. `campus_email_verified_at: null` is also pending, in case the
- * Auth API persists JSON nulls. Accounts created before this flow omit both
- * keys and are treated as verified.
+ * Legacy reading of Auth metadata flags. Do not use this for access control.
+ * URI verification is public.profiles.campus_email_verified_at. This object is
+ * client-editable and older accounts omitted the keys entirely.
  */
 export function needsCampusEmailVerification(metadata: Record<string, unknown> | undefined): boolean {
   if (!metadata) return false;

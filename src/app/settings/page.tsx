@@ -16,6 +16,10 @@ import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { PLANS } from '@/lib/pricing';
 import { privacyEmail } from '@/lib/legal';
 import { billingDemoEnabled, billingTestEnabled } from '@/lib/billing/config';
+import LocalBasicGrant from '@/components/basic/LocalBasicGrant';
+import { loadOwnBasicEntitlement } from '@/lib/basic/store';
+import { formatBasicExpiry } from '@/lib/basic/entitlement';
+import { isProductionRuntime } from '@/lib/runtime';
 
 export const metadata: Metadata = {
   title: 'Account settings | CampusQuest',
@@ -26,7 +30,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function SettingsPage() {
   const user = await signedInUser();
-  await redirectIfCampusEmailUnverified();
+  await redirectIfCampusEmailUnverified('/settings');
 
   // With no Supabase project the session lives in localStorage and cannot be
   // read here, so there is nothing this page can honestly show.
@@ -34,6 +38,8 @@ export default async function SettingsPage() {
 
   const age = user ? await ageStore().get(user.email) : null;
   const planName = user?.plan ? PLANS[user.plan]?.name : undefined;
+  const basic = user ? await loadOwnBasicEntitlement() : null;
+  const basicExpiry = basic?.active ? formatBasicExpiry(basic.endsAt) : null;
 
   return (
     <>
@@ -45,8 +51,8 @@ export default async function SettingsPage() {
             What we hold, and how to make us stop holding it.
           </p>
           {(billingTestEnabled() || billingDemoEnabled()) && (
-            <Link href={user?.role === 'organization' ? '/clubs/manage' : '/billing'} className="mt-6 inline-block rounded-xl border border-gold-400/40 px-5 py-3 text-sm font-semibold text-gold-400">
-              {user?.role === 'organization' ? 'Manage club page and test subscription' : 'Manage test subscription · no real charges'}
+            <Link href="/billing" className="mt-6 inline-block rounded-xl border border-gold-400/40 px-5 py-3 text-sm font-semibold text-gold-400">
+              CQ Basic founding pass · test mode, no real charges
             </Link>
           )}
 
@@ -59,6 +65,40 @@ export default async function SettingsPage() {
 
           {user && (
             <>
+              <section className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8">
+                <h2 className="text-lg font-extrabold">CampusQuest Basic</h2>
+                {basic?.known === false ? (
+                  <p className="mt-3 text-sm text-white/70">
+                    Basic status is unavailable until the access table is installed.
+                  </p>
+                ) : basic?.active ? (
+                  <div className="mt-4 space-y-3">
+                    <p className="inline-flex rounded-full bg-gold-400 px-3 py-1 text-sm font-bold text-brand-950">
+                      Founding Basic
+                    </p>
+                    {basicExpiry ? (
+                      <p className="text-sm text-white/80">Access ends {basicExpiry}.</p>
+                    ) : null}
+                    {basic.earlyAccess ? (
+                      <p className="inline-flex rounded-full border border-gold-400/50 px-3 py-1 text-sm font-semibold text-gold-300">
+                        Early Access
+                      </p>
+                    ) : null}
+                    <p>
+                      <Link href="/saved" className="text-sm font-semibold text-gold-400 hover:text-gold-500">
+                        Open Saved
+                      </Link>
+                    </p>
+                  </div>
+                ) : (
+                  <p className="mt-3 text-sm leading-relaxed text-white/70">
+                    Founding Basic is not active on this account. Browsing, search, and the public
+                    event directory stay free.
+                  </p>
+                )}
+                {!isProductionRuntime() ? <LocalBasicGrant /> : null}
+              </section>
+
               <section className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8">
                 <h2 className="text-lg font-extrabold">Details</h2>
                 <dl className="mt-4 space-y-3 text-sm">

@@ -37,7 +37,7 @@ const facts = [
 export default async function GeniusMiningPage() {
   // Checked before the record is loaded, so an under-18 never starts a session
   // that they would not be allowed to finish.
-  const access = await requireGeniusMiningAccess();
+  const access = await requireGeniusMiningAccess('/genius-mining');
   if (!access.allowed) return <AgeLocked reason={access.reason} />;
 
   const record = await loadCurrentRecord();

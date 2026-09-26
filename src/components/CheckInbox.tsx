@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { ArrowRight, Mail } from 'lucide-react';
+import { loginBypassVisible } from '@/lib/login-link';
+import { isProductionRuntime } from '@/lib/runtime';
 
 type CheckInboxProps = {
   email: string;
@@ -49,7 +51,7 @@ export default function CheckInbox({
         Use a different email
       </button>
 
-      {mock && (
+      {loginBypassVisible(mock, isProductionRuntime()) && (
         <div className="mt-6 pt-5 border-t border-white/10">
           <p className="text-xs text-white/40">
             Dev mode: no email will actually be sent.

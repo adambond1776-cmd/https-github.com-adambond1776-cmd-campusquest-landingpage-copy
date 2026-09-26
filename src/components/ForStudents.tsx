@@ -27,7 +27,7 @@ const features: {
   {
     icon: Bookmark,
     title: 'Save events for later',
-    body: "Planned for Basic: bookmark events you're interested in and come back to them. Event saving is not enabled in the current test build.",
+    body: 'Save events, clubs, and organizations in CampusQuest and return to them on your Saved dashboard. You can store a reminder preference for a saved event.',
     tier: 'basic',
   },
   {
@@ -39,7 +39,7 @@ const features: {
   {
     icon: User,
     title: 'Keep your interests up to date',
-    body: 'Choose your interests, rate your favorites and update your preferences as you explore. Recommendations start with what you enjoy, without an assessment.',
+    body: 'Choose your interests and update your preferences as you explore. Saving interests is free. Personalized club and organization recommendations are part of Basic.',
     tier: 'free',
   },
   {
@@ -65,7 +65,7 @@ const tierStyles: Record<PlanId, string> = {
 
 function tierLabel(tier: PlanId): string {
   if (tier === 'free') return 'Free';
-  if (tier === 'basic') return 'Basic: planned';
+  if (tier === 'basic') return 'Basic';
   return 'Later';
 }
 
@@ -80,9 +80,10 @@ export default function ForStudents() {
           </h2>
           <p className="mt-5 text-lg text-ink/60 leading-relaxed">
             Start with your interests and discover campus activities that fit.
-            Founding Basic is planned at ${FOUNDING_OFFERS.student.amount} for {FOUNDING_OFFERS.student.days} days
-            for saved searches and events. Existing interest preferences stay available;
-            Plus adds planned
+            Founding Basic is ${FOUNDING_OFFERS.student.amount} for {FOUNDING_OFFERS.student.days} days,
+            with no automatic renewal, and includes saved events, clubs, and organizations
+            plus personalized club and organization recommendations.
+            Existing interest preferences stay available; Plus adds planned
             activity planning and sharing. Genius Mining is a future optional
             discovery experience, not a requirement for finding your next activity.
           </p>

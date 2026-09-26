@@ -4,12 +4,13 @@ import { AUTH_UNCONFIGURED_MESSAGE, isProductionRuntime } from '@/lib/runtime';
 import {
   classifySignupError,
   logSignupFailure,
-  logSignupSuccess,
   SIGNUP_RETRY_MESSAGE,
   userFacingSignupMessage,
 } from '@/lib/signup-diagnostics';
+import { requestLoginLink } from '@/app/login/actions';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { SIGNUP_NETWORK_TIMEOUT_MS, withTimeout } from '@/lib/timeout';
+import { accountPrivileges, preferenceUserMetadata, type AccountProfile } from '@/lib/account/authorization';
 import { interestLabels, normalizeInterestProfile, validateInterestProfile, validateInterests, type InterestProfile } from '@/lib/interests';
 
 export type Role = 'student' | 'organization';
@@ -66,37 +67,6 @@ const asRole = (value: unknown): Role | undefined =>
 
 const asPlan = (value: unknown): Plan | undefined =>
   PLANS.includes(value as Plan) ? (value as Plan) : undefined;
-
-function isLocalOrigin(origin: string): boolean {
-  return /localhost|127\.0\.0\.1/i.test(origin);
-}
-
-/**
- * Absolute URL of the route handler that trades the emailed code for a
- * session. Production prefers NEXT_PUBLIC_SITE_URL so a stray preview host
- * cannot mint localhost or vercel.app callback links.
- */
-function callbackOrigin(): string | null {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, '');
-  if (isProductionRuntime()) {
-    const origin = configured || (typeof window !== 'undefined' ? window.location.origin : '');
-    if (!origin || isLocalOrigin(origin)) return null;
-    return origin;
-  }
-
-  if (typeof window !== 'undefined' && window.location?.origin) {
-    return window.location.origin;
-  }
-  return configured || null;
-}
-
-function callbackUrl(redirectTo: string): string | null {
-  const origin = callbackOrigin();
-  if (!origin) return null;
-  const callback = new URL('/auth/callback', origin);
-  callback.searchParams.set('next', redirectTo);
-  return callback.toString();
-}
 
 /* ---------- localStorage mock (used when Supabase is unconfigured) ---------- */
 
@@ -249,45 +219,20 @@ function readMockSession(): CurrentUser | null {
  * Emails a one-time login link for an existing account. New accounts are
  * created through the 6-digit signup flow, not from this form.
  */
-function mockAuthOrFail(
-  run: () => Promise<AuthResult>
-): Promise<AuthResult> {
-  if (isProductionRuntime()) {
-    return Promise.resolve({ ok: false, message: AUTH_UNCONFIGURED_MESSAGE });
-  }
-  return run();
-}
-
 export async function signInWithEmail({
   email,
   redirectTo = SIGN_IN_REDIRECT,
 }: SignInInput): Promise<AuthResult> {
   try {
-    const supabase = createClient();
-    if (!supabase) return mockAuthOrFail(() => mockSendLink(email));
-
-    const emailRedirectTo = callbackUrl(redirectTo);
-    if (!emailRedirectTo) {
-      logSignupFailure({ stage: 'sign_in', kind: 'configuration' });
-      return { ok: false, message: AUTH_UNCONFIGURED_MESSAGE };
+    const origin = typeof window !== 'undefined' ? window.location.origin : undefined;
+    const result = await requestLoginLink({ email, redirectTo, origin });
+    if (result.ok && result.mock) {
+      if (isProductionRuntime()) {
+        return { ok: false, message: AUTH_UNCONFIGURED_MESSAGE };
+      }
+      return mockSendLink(email);
     }
-
-    const { error } = await withTimeout(
-      supabase.auth.signInWithOtp({
-        email: normalizeEmail(email),
-        options: { emailRedirectTo, shouldCreateUser: false },
-      }),
-      SIGNUP_NETWORK_TIMEOUT_MS,
-      'sign_in_otp'
-    );
-
-    if (error) {
-      logSignupFailure({ stage: 'sign_in', kind: 'supabase_auth' });
-      return { ok: false, message: SIGNUP_RETRY_MESSAGE };
-    }
-
-    logSignupSuccess('sign_in');
-    return { ok: true, mock: false, alreadyRegistered: false };
+    return result;
   } catch (error) {
     const kind = classifySignupError(error);
     logSignupFailure({ stage: 'sign_in', kind });
@@ -306,8 +251,10 @@ export async function completeOnboarding(details: OnboardingInput): Promise<Onbo
   const validated = details.interestPreferences === undefined
     ? validateInterests(details.interests) : validateInterestProfile(details.interestPreferences);
   if (!validated.ok) return validated;
-  const normalizedDetails = { role: details.role, plan: details.plan, interests: validated.interests,
-    interest_preferences: validated.profile };
+  const preferences = preferenceUserMetadata({
+    interests: validated.interests,
+    interestPreferences: validated.profile,
+  });
   try {
     const supabase = createClient();
     if (!supabase) {
@@ -318,7 +265,7 @@ export async function completeOnboarding(details: OnboardingInput): Promise<Onbo
     }
 
     const { error } = await withTimeout(
-      supabase.auth.updateUser({ data: normalizedDetails }),
+      supabase.auth.updateUser({ data: preferences }),
       SIGNUP_NETWORK_TIMEOUT_MS,
       'complete_onboarding'
     );
@@ -347,13 +294,35 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
   const metadata: Record<string, unknown> = user.user_metadata ?? {};
   const interestPreferences = normalizeInterestProfile(metadata.interest_preferences, metadata.interests);
+  const profile = await readOwnProfile(supabase, user.id);
+  const privileges = accountPrivileges(profile, metadata);
   return {
     email: user.email,
-    role: asRole(metadata.role),
-    plan: asPlan(metadata.plan),
+    role: undefined,
+    plan: privileges.plan,
     interests: interestLabels(interestPreferences),
     interestPreferences,
   };
+}
+
+async function readOwnProfile(
+  supabase: NonNullable<ReturnType<typeof createClient>>,
+  userId: string
+): Promise<AccountProfile | null> {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, campus_email_verified_at')
+      .eq('id', userId)
+      .maybeSingle();
+    if (error || !data?.id) return null;
+    return {
+      userId: data.id,
+      campusEmailVerifiedAt: data.campus_email_verified_at,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function signOut(): Promise<void> {

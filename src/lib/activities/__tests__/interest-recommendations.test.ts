@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { recommendByInterests } from '../interest-recommendations';
+import { matchesRecommendationFilter, recommendByInterests, recommendDirectoryByInterests } from '../interest-recommendations';
 import type { Activity } from '../types';
 import { applyOverlay, CURATED_DIRECTORIES } from '../sources/curated';
 import { type InterestProfile } from '@/lib/interests';
@@ -138,6 +138,158 @@ describe('simple interest recommendations', () => {
     expect(recommendByInterests([row({
       name: 'MUSIC', summary: 'Multicultural unity and student involvement council.', categories: ['Culture & Community'],
     })], ['Music'], 'uri', now)).toEqual([]);
+  });
+  const selected = [
+    'Dance & theater',
+    'Playing sports',
+    'Outdoors & nature',
+    'Academic interests & study groups',
+    'Volunteering & service',
+    'Culture, languages & international activities',
+  ];
+  it('keeps reasons on the interests this member actually saved', () => {
+    const rows = [
+      row({
+        id: 'career-fair',
+        status: 'listed',
+        kind: 'event',
+        name: 'Spring career opportunities',
+        summary: 'Finance and engineering employers are hiring.',
+        categories: ['Careers / Job Fairs'],
+        starts_at: '2026-09-21T15:00:00Z',
+      }),
+      row({
+        id: 'career-phrase',
+        status: 'listed',
+        kind: 'event',
+        name: 'Career opportunities drop-in',
+        summary: 'Bring a resume.',
+        categories: [],
+        starts_at: '2026-09-21T16:00:00Z',
+      }),
+      row({
+        id: 'study-tip',
+        status: 'listed',
+        kind: 'event',
+        name: 'Study tips',
+        summary: 'A short workshop.',
+        categories: [],
+        starts_at: '2026-09-21T17:00:00Z',
+      }),
+      row({
+        id: 'dance',
+        status: 'listed',
+        kind: 'event',
+        name: 'Dance showcase',
+        summary: 'Student choreography and theater.',
+        categories: [],
+        starts_at: '2026-09-22T00:00:00Z',
+      }),
+      row({
+        id: 'econ',
+        status: 'listed',
+        kind: 'event',
+        name: 'Economics research seminar',
+        summary: 'Undergraduate research in economics.',
+        categories: ['Academic'],
+        starts_at: '2026-09-23T15:00:00Z',
+      }),
+      row({
+        id: 'hike',
+        status: 'listed',
+        kind: 'organization',
+        name: 'Trail Hiking Club',
+        summary: 'Weekend hiking and nature trips.',
+        categories: [],
+      }),
+      row({
+        id: 'service',
+        status: 'listed',
+        kind: 'organization',
+        name: 'Campus Volunteers',
+        summary: 'Weekly volunteering.',
+        categories: ['Service'],
+      }),
+      row({
+        id: 'language',
+        status: 'listed',
+        kind: 'organization',
+        name: 'Language Exchange',
+        summary: 'Practice languages with the international community.',
+        categories: ['Multicultural'],
+      }),
+      row({
+        id: 'soccer',
+        status: 'listed',
+        kind: 'game',
+        name: "Women's Soccer vs Maine",
+        summary: 'Home soccer game.',
+        categories: ['Athletics'],
+        athletics: { sport: "Women's Soccer", home: true, opponent: 'Maine', result: null },
+        starts_at: '2026-09-22T23:00:00Z',
+      }),
+    ];
+    const result = recommendDirectoryByInterests(rows, selected, 'uri', now);
+    expect(result.map((item) => item.activity.id)).not.toContain('career-fair');
+    expect(result.map((item) => item.activity.id)).not.toContain('career-phrase');
+    expect(result.map((item) => item.activity.id)).not.toContain('study-tip');
+    expect(result.map((item) => item.matchedInterests[0])).not.toContain('Career');
+    for (const item of result) {
+      expect(selected).toContain(item.matchedInterests[0]);
+      expect(item.reason).toBe(`Because you’re interested in “${item.matchedInterests[0]}”`);
+      expect(item.reason).not.toMatch(/Career|Academics|Sports/);
+    }
+    expect(result.find((item) => item.activity.id === 'soccer')?.reason)
+      .toBe('Because you’re interested in “Playing sports”');
+    expect(result.find((item) => item.activity.id === 'dance')?.reason)
+      .toBe('Because you’re interested in “Dance & theater”');
+    expect(result.find((item) => item.activity.id === 'econ')?.reason)
+      .toBe('Because you’re interested in “Academic interests & study groups”');
+    expect(new Set(result.map((item) => item.activity.kind))).toEqual(new Set(['event', 'organization', 'game']));
+  });
+  it('uses the career label only when that interest was saved', () => {
+    const result = recommendDirectoryByInterests([
+      row({
+        id: 'career-fair',
+        status: 'listed',
+        kind: 'event',
+        name: 'Spring career opportunities',
+        summary: 'Meet employers.',
+        categories: ['Careers / Job Fairs'],
+        starts_at: '2026-09-21T15:00:00Z',
+      }),
+    ], ['Careers, business & entrepreneurship'], 'uri', now);
+    expect(result.map((item) => item.reason)).toEqual([
+      'Because you’re interested in “Careers, business & entrepreneurship”',
+    ]);
+  });
+  it('returns nothing when the signed-in user has no saved interests', () => {
+    expect(recommendDirectoryByInterests([
+      row({ status: 'listed', summary: 'Entrepreneurship startup.' }),
+    ], [], 'uri', now)).toEqual([]);
+  });
+  it('filters clubs, events, and organizations without changing which listings matched', () => {
+    const club = row({ id: 'club', kind: 'organization', name: 'Robotics Club', summary: 'Engineering projects.' });
+    const organization = row({ id: 'org', kind: 'organization', name: 'Founders Society', summary: 'A student organization.' });
+    const event = row({ id: 'event', kind: 'event', name: 'Research seminar', summary: 'Economics research.', starts_at: '2026-09-21T15:00:00Z' });
+    const game = row({
+      id: 'game',
+      kind: 'game',
+      name: "Women's Soccer vs Maine",
+      summary: 'Home soccer game.',
+      categories: ['Athletics'],
+      athletics: { sport: "Women's Soccer", home: true, opponent: 'Maine', result: null },
+      starts_at: '2026-09-22T23:00:00Z',
+    });
+    const listings = [club, organization, event, game];
+    expect(listings.filter((item) => matchesRecommendationFilter(item, 'all')).map((item) => item.id))
+      .toEqual(['club', 'org', 'event', 'game']);
+    expect(listings.filter((item) => matchesRecommendationFilter(item, 'clubs')).map((item) => item.id))
+      .toEqual(['club']);
+    expect(listings.filter((item) => matchesRecommendationFilter(item, 'events')).map((item) => item.id))
+      .toEqual(['event', 'game']);
+    expect(listings.filter((item) => matchesRecommendationFilter(item, 'organizations')).map((item) => item.id))
+      .toEqual(['org']);
   });
   it('shows a curiosity explanation and never treats an unselected interest as a match', () => {
     const profile = { version: 1, selections: [{ id: 'technology', priority: 1, details: [] }] };

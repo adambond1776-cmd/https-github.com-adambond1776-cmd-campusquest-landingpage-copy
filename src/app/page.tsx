@@ -9,8 +9,12 @@ import FinalCTA from '@/components/FinalCTA';
 import Footer from '@/components/Footer';
 import SponsorBanner from '@/components/SponsorBanner';
 import { ACTIVE_SPONSOR } from '@/lib/launch-offers';
+import { loadOwnBasicEntitlement } from '@/lib/basic/store';
+import { signedInUser } from '@/lib/session';
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const user = await signedInUser();
+  const basic = user ? await loadOwnBasicEntitlement() : null;
   return (
     <>
       <Navbar />
@@ -21,7 +25,7 @@ export default function LandingPage() {
         <ForStudents />
         <ForOrganizations />
         <HowItWorks />
-        <Pricing />
+        <Pricing basicActive={basic?.active === true} />
         <FinalCTA />
       </main>
       <Footer />

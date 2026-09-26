@@ -32,6 +32,13 @@ afterEach(async () => {
 
 const EMAIL = 'leaver@uri.edu';
 
+function deletionAdmin() {
+  return {
+    auth: { admin: { deleteUser: vi.fn().mockResolvedValue({ error: null }) } },
+    from: () => ({ delete: () => ({ eq: async () => ({ error: null }) }) }),
+  };
+}
+
 describe('account deletion', () => {
   it('erases the age record, the corrections and the campus interest', async () => {
     const { ageStore } = await import('@/lib/age-store');
@@ -66,9 +73,14 @@ describe('account deletion', () => {
       created_at: new Date().toISOString(),
     });
 
-    const result = await deleteAccount({ email: EMAIL, userId: null });
+    const result = await deleteAccount({
+      email: EMAIL,
+      userId: 'user-1',
+      admin: deletionAdmin() as never,
+    });
 
     expect(result.ok).toBe(true);
+    expect(result.authUserDeleted).toBe(true);
     expect(await ageStore().get(EMAIL)).toBeNull();
     expect(await getReportStore().byReporter(hashReporter(EMAIL))).toHaveLength(0);
     expect(await getDemandStore().countFor('uri')).toBe(0);
@@ -76,7 +88,11 @@ describe('account deletion', () => {
 
   it('reports which table each step touched, so a gap is visible', async () => {
     const { deleteAccount } = await import('@/lib/account/delete');
-    const result = await deleteAccount({ email: EMAIL, userId: null });
+    const result = await deleteAccount({
+      email: EMAIL,
+      userId: 'user-1',
+      admin: deletionAdmin() as never,
+    });
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -89,6 +105,7 @@ describe('account deletion', () => {
         'activity_reports',
         'campus_interest',
         'age_record',
+        'verification_challenges',
         'auth_user',
       ])
     );
@@ -101,7 +118,11 @@ describe('account deletion', () => {
     await ageStore().attest(EMAIL, 1998);
     await ageStore().attest('stays@uri.edu', 1997);
 
-    await deleteAccount({ email: EMAIL, userId: null });
+    await deleteAccount({
+      email: EMAIL,
+      userId: 'user-1',
+      admin: deletionAdmin() as never,
+    });
 
     expect(await ageStore().get(EMAIL)).toBeNull();
     expect(await ageStore().get('stays@uri.edu')).not.toBeNull();

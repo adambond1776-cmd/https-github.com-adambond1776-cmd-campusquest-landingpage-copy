@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -30,9 +30,11 @@ import { recordAge } from '@/app/signup/age-actions';
 import {
   resendCampusSignupCode,
   startCampusSignup,
+  startExistingAccountVerification,
   verifyCampusSignupCode,
 } from '@/app/signup/signup-actions';
 import { completeOnboarding, rememberMockSignup, type Plan, type Role } from '@/lib/auth';
+import { saveAccountRole } from '@/app/signup/signup-actions';
 import { maskCampusEmail } from '@/lib/email-verification';
 import { CHECKOUT_LIVE, PRICE_LOCK_COPY, STUDENT_PLANS } from '@/lib/pricing';
 import { FOUNDING_OFFERS, FOUNDING_TERMS, launchPlanDisplay } from '@/lib/launch-offers';
@@ -64,17 +66,19 @@ type PendingVerification = {
  * missing, so the email step is dropped and the answers are written straight to
  * the account.
  *
- * `verifying` means they already have a pending account and need to enter the
- * 6-digit code.
+ * `verifying` means this signed-in account still needs a URI code. The existing
+ * profile stays in place. Success returns to the feature that asked for it.
  */
 export default function Onboarding({
   finishing = false,
   verifying = false,
   sessionEmail = null,
+  returnTo = '/welcome',
 }: {
   finishing?: boolean;
   verifying?: boolean;
   sessionEmail?: string | null;
+  returnTo?: string;
 }) {
   const router = useRouter();
   // Nothing to introduce when the account already exists — start on the first
@@ -95,6 +99,32 @@ export default function Onboarding({
       : null
   );
   const submitGate = useRef(createSubmitGate());
+  const existingCodeStarted = useRef(false);
+
+  useEffect(() => {
+    if (!verifying || !sessionEmail || existingCodeStarted.current) return;
+    existingCodeStarted.current = true;
+    let active = true;
+    startExistingAccountVerification().then((result) => {
+      if (!active) return;
+      if (!result.ok) {
+        setFormError(result.message);
+        return;
+      }
+      if (result.alreadyVerified) {
+        router.replace(returnTo);
+        return;
+      }
+      setPending({
+        email: sessionEmail,
+        emailMasked: result.emailMasked,
+        mock: result.mock,
+      });
+    });
+    return () => {
+      active = false;
+    };
+  }, [verifying, sessionEmail, returnTo, router]);
 
   // Clear a field's complaint as soon as it is being corrected, so stale errors
   // never sit under freshly typed input.
@@ -144,6 +174,12 @@ export default function Onboarding({
             setFormError(recorded.message);
             return;
           }
+        }
+
+        const savedRole = await saveAccountRole(role);
+        if (!savedRole.ok) {
+          setFormError(savedRole.message);
+          return;
         }
 
         const result = await withTimeout(
@@ -211,10 +247,10 @@ export default function Onboarding({
     if (!pending) return { ok: false as const, message: SIGNUP_RETRY_MESSAGE };
     const result = await verifyCampusSignupCode({ email: pending.email, code });
     if (!result.ok) return result;
-    if (pending.mock && role && plan) {
+    if (pending.mock && role && plan && !verifying) {
       rememberMockSignup({ email: pending.email, role, interests, interestPreferences, plan });
     }
-    router.push('/welcome?new=1');
+    router.push(verifying ? returnTo : '/welcome?new=1');
     return { ok: true as const };
   };
 
@@ -303,6 +339,12 @@ export default function Onboarding({
             ))}
           </div>
 
+          {verifying && (
+            <p className="mb-8 text-center text-sm text-white/60">
+              Confirm the URI email already on this account. This keeps your profile and does not create a second one.
+            </p>
+          )}
+
           {finishing && (
             <p className="mb-8 text-center text-sm text-white/50">
               Your email is confirmed. Answer a few questions and your account is set up.
@@ -327,6 +369,8 @@ export default function Onboarding({
                   email={pending.email}
                   emailMasked={pending.emailMasked}
                   mock={pending.mock}
+                  statusMessage={formError}
+                  allowDifferentEmail={!verifying}
                   onVerified={handleVerified}
                   onResend={handleResend}
                   onUseDifferentEmail={retry}

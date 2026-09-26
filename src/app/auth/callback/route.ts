@@ -1,50 +1,43 @@
 import { NextResponse } from 'next/server';
-import { needsCampusEmailVerification } from '@/lib/email-verification';
+import { accountPrivileges } from '@/lib/account/authorization';
+import { loadAccountForSessionUser } from '@/lib/account/profile';
+import { campusVerificationPath } from '@/lib/gate';
+import { safeReturnPath } from '@/lib/return-path';
 import { createClient } from '@/lib/supabase/server';
 
 const DEFAULT_NEXT = '/welcome';
 const ERROR_PATH = '/auth/auth-code-error';
-const FINISH_ONBOARDING_PATH = '/signup?finish=1';
-const VERIFY_EMAIL_PATH = '/signup?verify=1';
-
-/**
- * Only same-origin relative paths are honoured, so a tampered link cannot turn
- * the callback into an open redirect.
- */
-function safeNext(value: string | null): string {
-  if (!value || !value.startsWith('/') || value.startsWith('//')) return DEFAULT_NEXT;
-  return value;
-}
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
-  const next = safeNext(searchParams.get('next'));
+  const next = safeReturnPath(searchParams.get('next'), DEFAULT_NEXT);
   const code = searchParams.get('code');
+  const tokenHash = searchParams.get('token_hash');
+  const type = searchParams.get('type');
 
   const failure = (reason: string) =>
     NextResponse.redirect(new URL(`${ERROR_PATH}?reason=${reason}`, origin));
 
   // Supabase reports a rejected or expired link on the query string.
   if (searchParams.get('error')) return failure('link');
-  if (!code) return failure('missing');
 
   const supabase = await createClient();
   if (!supabase) return failure('unconfigured');
 
-  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-  if (error) return failure('link');
+  const exchanged = code
+    ? await supabase.auth.exchangeCodeForSession(code)
+    : tokenHash && type === 'magiclink'
+      ? await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'magiclink' })
+      : null;
 
-  const metadata = (data.user?.user_metadata ?? {}) as Record<string, unknown>;
-  if (needsCampusEmailVerification(metadata)) {
-    return NextResponse.redirect(new URL(VERIFY_EMAIL_PATH, origin));
-  }
+  if (!exchanged) return failure('missing');
+  if (exchanged.error || !exchanged.data.user?.id) return failure('link');
 
-  // Login of an address that never finished onboarding lands here signed in
-  // but with no role, plan or interests. Those accounts finish onboarding
-  // instead of dropping onto a welcome page that has nothing to tell them.
-  const role = data.user?.user_metadata?.role;
-  if (role !== 'student' && role !== 'organization') {
-    return NextResponse.redirect(new URL(FINISH_ONBOARDING_PATH, origin));
+  const metadata = (exchanged.data.user.user_metadata ?? {}) as Record<string, unknown>;
+  const profile = await loadAccountForSessionUser(supabase, exchanged.data.user.id);
+  const privileges = accountPrivileges(profile, metadata);
+  if (!privileges.verified) {
+    return NextResponse.redirect(new URL(campusVerificationPath(next), origin));
   }
 
   return NextResponse.redirect(new URL(next, origin));

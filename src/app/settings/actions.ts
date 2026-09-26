@@ -31,11 +31,12 @@ export async function deleteMyAccount(confirmation: string): Promise<DeleteResul
   if (!user?.email) return { ok: false, message: 'Sign in first.' };
 
   const result = await deleteAccount({ email: user.email, userId: user.id });
-  if (!result.ok) return { ok: false, message: result.message };
-
-  // The auth user is already gone by this point; clearing the cookie stops the
-  // browser holding a session for an account that no longer exists.
-  await supabase.auth.signOut();
+  if (result.authUserDeleted) {
+    await supabase.auth.signOut();
+  }
+  if (!result.ok || !result.authUserDeleted) {
+    return { ok: false, message: result.message };
+  }
 
   return { ok: true };
 }

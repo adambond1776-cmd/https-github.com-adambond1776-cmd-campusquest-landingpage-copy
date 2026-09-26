@@ -4,10 +4,17 @@ import { AlertTriangle, CalendarX, Compass, Trophy } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ActivityCard from '@/components/activities/ActivityCard';
+import { BasicSaveProvider } from '@/components/basic/BasicSaveProvider';
+import { loadOwnBasicEntitlement, loadOwnSavedItems } from '@/lib/basic/store';
+import { savedItemKey } from '@/lib/basic/saved';
 import InterestRecommendations from '@/components/activities/InterestRecommendations';
-import { recommendByInterests } from '@/lib/activities/interest-recommendations';
+import {
+  RECOMMENDATION_POOL_LIMIT,
+  recommendDirectoryByInterests,
+  recommendationsForBasicAccess,
+} from '@/lib/activities/interest-recommendations';
+import { loadOwnInterests } from '@/lib/saved-interests';
 import { signedInUser } from '@/lib/session';
-import { recommendationBillingAccess } from '@/lib/billing/access';
 import ActivityFilters from '@/components/activities/ActivityFilters';
 import ReportPanel from '@/components/activities/ReportPanel';
 import FoundingOfferPrompt from '@/components/activities/FoundingOfferPrompt';
@@ -65,10 +72,19 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: S
 
   const now = new Date();
   const user = await signedInUser();
-  const interests = user?.interests ?? [];
-  const billingAccess = user ? await recommendationBillingAccess() : { allowed: true };
-  const recommendations = billingAccess.allowed
-    ? recommendByInterests(all, user?.interestPreferences ?? interests, campusId, now) : [];
+  const savedInterests = user ? await loadOwnInterests() : [];
+  const basic = user ? await loadOwnBasicEntitlement(now) : null;
+  const savedItems = user ? await loadOwnSavedItems() : [];
+  const saveState = {
+    signedIn: Boolean(user),
+    active: basic?.active === true,
+    savedKeys: (savedItems ?? []).map((item) => savedItemKey(item.kind, item.target_id)),
+  };
+  const basicActive = basic?.active === true;
+  const recommendations = recommendationsForBasicAccess(
+    recommendDirectoryByInterests(all, savedInterests, campusId, now, RECOMMENDATION_POOL_LIMIT),
+    basicActive,
+  );
 
   // Dated rows drop off the directory once they have finished. Undated rows
   // (clubs, facilities) always stay.
@@ -130,6 +146,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: S
   return (
     <>
       <Navbar appearance="light" />
+      <BasicSaveProvider state={saveState}>
       <main className="bg-cream-50 min-h-screen">
         {/* Top padding clears the fixed navbar, which overlays the page. */}
         <header className="bg-white border-b border-cream-300">
@@ -159,7 +176,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: S
         </header>
 
         {!loadError && campusDirectoryLive(campusId) && (
-          <InterestRecommendations signedIn={Boolean(user)} interests={interests} recommendations={recommendations} billingMessage={billingAccess.message} />
+          <InterestRecommendations signedIn={Boolean(user)} hasInterests={savedInterests.length > 0} basicActive={basicActive} recommendations={recommendations} />
         )}
 
         {/* Home games get their own rail above the filters. Filling seats is the
@@ -298,6 +315,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: S
           ) : null}
         </div>
       </main>
+      </BasicSaveProvider>
       <Footer />
     </>
   );

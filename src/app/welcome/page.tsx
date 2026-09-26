@@ -41,7 +41,7 @@ export default async function WelcomePage({
   const params = await searchParams;
   const flag = Array.isArray(params.new) ? params.new[0] : params.new;
   const user = await signedInUser();
-  await redirectIfCampusEmailUnverified();
+  await redirectIfCampusEmailUnverified('/welcome');
 
   return (
     <WelcomeView

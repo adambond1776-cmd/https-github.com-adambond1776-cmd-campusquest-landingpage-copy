@@ -19,7 +19,15 @@ type Row = {
   invalidated_at: string | null;
 };
 
-const { rows } = vi.hoisted(() => ({ rows: [] as Row[] }));
+const { rows, consumeIfHashMatches } = vi.hoisted(() => ({
+  rows: [] as Row[],
+  consumeIfHashMatches: vi.fn(async () => false),
+}));
+
+vi.mock('@/lib/account/profile', () => ({
+  ensureUnverifiedProfileShell: async () => undefined,
+  isServerAccountVerified: async () => true,
+}));
 
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({ auth: { admin: {} } }),
@@ -55,7 +63,7 @@ vi.mock('@/lib/email-verification-store', () => ({
       const row = rows.find((item) => item.id === id);
       if (row) row.dispatched_at = at;
     },
-    consumeIfHashMatches: async () => false,
+    consumeIfHashMatches,
     incrementAttempts: async (id: string) => {
       const row = rows.find((item) => item.id === id);
       if (!row) return 0;
@@ -135,5 +143,28 @@ describe('verifyCampusEmailCode', () => {
     await expect(
       verifyCampusEmailCode({ userId: 'user-1', email: 'ram@uri.edu', code: '123456' })
     ).rejects.toMatchObject({ message: CAMPUS_EMAIL_USER_MESSAGES.expired });
+  });
+
+  it('asks the production consume function to stamp the existing profile', async () => {
+    rows.length = 0;
+    consumeIfHashMatches.mockResolvedValue(true);
+    rows.push({
+      id: 'c1',
+      user_id: 'user-1',
+      email: 'ram@uri.edu',
+      code_hash: 'hash:123456',
+      expires_at: new Date(Date.now() + 60_000).toISOString(),
+      attempts: 0,
+      created_at: new Date().toISOString(),
+      dispatched_at: new Date().toISOString(),
+      consumed_at: null,
+      invalidated_at: null,
+    });
+
+    const result = await verifyCampusEmailCode({ userId: 'user-1', email: 'ram@uri.edu', code: '123456' });
+    expect(result.ok).toBe(true);
+    expect(consumeIfHashMatches).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'c1', userId: 'user-1', codeHash: 'hash:123456' })
+    );
   });
 });

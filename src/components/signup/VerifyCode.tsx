@@ -13,6 +13,8 @@ export default function VerifyCode({
   onVerified,
   onResend,
   onUseDifferentEmail,
+  statusMessage = null,
+  allowDifferentEmail = true,
 }: {
   email: string;
   emailMasked: string;
@@ -20,6 +22,8 @@ export default function VerifyCode({
   onVerified: (code: string) => Promise<{ ok: true } | { ok: false; message: string }>;
   onResend: () => Promise<{ ok: true } | { ok: false; message: string }>;
   onUseDifferentEmail: () => void;
+  statusMessage?: string | null;
+  allowDifferentEmail?: boolean;
 }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +81,7 @@ export default function VerifyCode({
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         {error && <FormAlert message={error} />}
+        {!error && statusMessage && <FormAlert message={statusMessage} />}
         {notice && (
           <p className="rounded-xl border border-brand-400/30 bg-brand-500/10 px-4 py-3 text-sm text-white/80">
             {notice}
@@ -119,13 +124,15 @@ export default function VerifyCode({
         >
           {resending ? 'Sending a new code…' : 'Resend code'}
         </button>
-        <button
-          type="button"
-          onClick={onUseDifferentEmail}
-          className="text-sm text-white/50 hover:text-white/80"
-        >
-          Use a different email
-        </button>
+        {allowDifferentEmail && (
+          <button
+            type="button"
+            onClick={onUseDifferentEmail}
+            className="text-sm text-white/50 hover:text-white/80"
+          >
+            Use a different email
+          </button>
+        )}
       </div>
 
       {mock && (

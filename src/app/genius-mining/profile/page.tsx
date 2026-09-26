@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function ProfilePage() {
-  const access = await requireGeniusMiningAccess();
+  const access = await requireGeniusMiningAccess('/genius-mining/profile');
   if (!access.allowed) return <AgeLocked reason={access.reason} />;
 
   const record = await loadCurrentRecord();

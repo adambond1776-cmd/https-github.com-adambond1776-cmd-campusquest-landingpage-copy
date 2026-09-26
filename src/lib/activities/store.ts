@@ -16,6 +16,18 @@ import {
   inspectSupabaseAnonCredentials,
   logActivitiesFailure,
 } from '@/lib/supabase/credentials';
+import {
+  activityFromCanonicalEvent,
+  activityFromCanonicalOrganization,
+  CANONICAL_CAMPUS_ID,
+  CANONICAL_EVENT_COLUMNS,
+  CANONICAL_EVENT_TABLE,
+  CANONICAL_ORGANIZATION_COLUMNS,
+  CANONICAL_ORGANIZATION_TABLE,
+  isCanonicalRecordId,
+  type CanonicalEventRow,
+  type CanonicalOrganizationRow,
+} from '@/lib/activities/canonical';
 import type { Activity, ActivityStatus } from '@/lib/activities/types';
 
 /**
@@ -145,7 +157,122 @@ class LocalActivityStore implements ActivityStore {
  * Supabase store
  * ------------------------------------------------------------------ */
 
-const TABLE = 'cq_activities';
+const LEGACY_TABLE = 'cq_activities';
+
+/**
+ * Public directory. Reads the main app's event and organization tables with
+ * the anon key. RLS already limits those tables to active rows. This store
+ * does not write them.
+ */
+class CanonicalActivityStore implements ActivityStore {
+  readonly kind = 'supabase' as const;
+
+  constructor(private readonly client: SupabaseClient) {}
+
+  async all(campusId?: string): Promise<Activity[]> {
+    if (campusId && campusId !== CANONICAL_CAMPUS_ID) return [];
+    return this.load();
+  }
+
+  async list(query: ActivityQuery): Promise<Activity[]> {
+    if (query.campusId && query.campusId !== CANONICAL_CAMPUS_ID) return [];
+    return applyQuery(await this.load(), query);
+  }
+
+  async get(id: string): Promise<Activity | null> {
+    if (!isCanonicalRecordId(id)) return null;
+
+    const event = await this.one(CANONICAL_EVENT_TABLE, CANONICAL_EVENT_COLUMNS, id);
+    if (event) {
+      return activityFromCanonicalEvent(event as CanonicalEventRow);
+    }
+
+    const organization = await this.one(
+      CANONICAL_ORGANIZATION_TABLE,
+      CANONICAL_ORGANIZATION_COLUMNS,
+      id
+    );
+    if (!organization) return null;
+    return activityFromCanonicalOrganization(organization as CanonicalOrganizationRow);
+  }
+
+  async upsert(): Promise<void> {
+    throw new Error('The public activity directory reads canonical events and does not write them.');
+  }
+
+  async setStatus(): Promise<void> {
+    throw new Error('The public activity directory reads canonical events and does not write them.');
+  }
+
+  private async load(): Promise<Activity[]> {
+    const [events, organizations] = await Promise.all([
+      this.rows(CANONICAL_EVENT_TABLE, CANONICAL_EVENT_COLUMNS, (request) =>
+        request
+          .eq('is_active', true)
+          .eq('is_cancelled', false)
+          .eq('visibility', 'public')
+          .is('canonical_event_id', null)
+          .order('starts_at', { ascending: true, nullsFirst: false })
+          .limit(2000)
+      ),
+      this.rows(CANONICAL_ORGANIZATION_TABLE, CANONICAL_ORGANIZATION_COLUMNS, (request) =>
+        request.eq('is_active', true).order('name', { ascending: true }).limit(2000)
+      ),
+    ]);
+
+    return [
+      ...events.flatMap((row) => {
+        const activity = activityFromCanonicalEvent(row as CanonicalEventRow);
+        return activity ? [activity] : [];
+      }),
+      ...organizations.flatMap((row) => {
+        const activity = activityFromCanonicalOrganization(row as CanonicalOrganizationRow);
+        return activity ? [activity] : [];
+      }),
+    ];
+  }
+
+  private async rows(
+    table: string,
+    columns: string,
+    refine: (request: FilterableQuery) => FilterableQuery
+  ): Promise<Record<string, unknown>[]> {
+    const request = refine(this.client.from(table).select(columns) as unknown as FilterableQuery);
+    const { data, error } = await request;
+    if (error) this.fail('list', error);
+    return (data ?? []) as Record<string, unknown>[];
+  }
+
+  private async one(
+    table: string,
+    columns: string,
+    id: string
+  ): Promise<Record<string, unknown> | null> {
+    const { data, error } = await this.client.from(table).select(columns).eq('id', id).maybeSingle();
+    if (error) this.fail('read_one', error);
+    return (data as Record<string, unknown> | null) ?? null;
+  }
+
+  private fail(stage: 'list' | 'read_one' | 'read_all', error: { message: string }): never {
+    const kind = classifyActivitiesReadError(error);
+    logActivitiesFailure({
+      stage,
+      kind,
+      inspection: inspectSupabaseAnonCredentials(supabaseUrl(), supabaseAnonKey()),
+    });
+    throw new ActivitiesDirectoryError(kind);
+  }
+}
+
+type FilterableQuery = PromiseLike<{ data: unknown[] | null; error: { message: string } | null }> & {
+  eq: (column: string, value: unknown) => FilterableQuery;
+  is: (column: string, value: null) => FilterableQuery;
+  order: (
+    column: string,
+    options: { ascending: boolean; nullsFirst?: boolean }
+  ) => FilterableQuery;
+  limit: (count: number) => FilterableQuery;
+};
 
 class SupabaseActivityStore implements ActivityStore {
   readonly kind = 'supabase' as const;
@@ -153,7 +280,7 @@ class SupabaseActivityStore implements ActivityStore {
   constructor(private readonly client: SupabaseClient) {}
 
   async all(campusId?: string): Promise<Activity[]> {
-    let request = this.client.from(TABLE).select('*');
+    let request = this.client.from(LEGACY_TABLE).select('*');
     if (campusId) request = request.eq('campus_id', campusId);
 
     const { data, error } = await request;
@@ -170,7 +297,7 @@ class SupabaseActivityStore implements ActivityStore {
   }
 
   async list(query: ActivityQuery): Promise<Activity[]> {
-    let request = this.client.from(TABLE).select('*');
+    let request = this.client.from(LEGACY_TABLE).select('*');
 
     if (query.campusId) request = request.eq('campus_id', query.campusId);
     if (query.kinds?.length) request = request.in('kind', query.kinds);
@@ -195,7 +322,7 @@ class SupabaseActivityStore implements ActivityStore {
   }
 
   async get(id: string): Promise<Activity | null> {
-    const { data, error } = await this.client.from(TABLE).select('*').eq('id', id).maybeSingle();
+    const { data, error } = await this.client.from(LEGACY_TABLE).select('*').eq('id', id).maybeSingle();
     if (error) {
       const kind = classifyActivitiesReadError(error);
       logActivitiesFailure({
@@ -215,7 +342,7 @@ class SupabaseActivityStore implements ActivityStore {
     // and PostgREST rejects very large single payloads.
     for (let i = 0; i < activities.length; i += 200) {
       const { error } = await this.client
-        .from(TABLE)
+        .from(LEGACY_TABLE)
         .upsert(activities.slice(i, i + 200), { onConflict: 'id' });
       if (error) throw new Error(`Writing activities failed: ${error.message}`);
     }
@@ -223,7 +350,7 @@ class SupabaseActivityStore implements ActivityStore {
 
   async setStatus(ids: string[], status: ActivityStatus): Promise<void> {
     if (ids.length === 0) return;
-    const { error } = await this.client.from(TABLE).update({ status }).in('id', ids);
+    const { error } = await this.client.from(LEGACY_TABLE).update({ status }).in('id', ids);
     if (error) throw new Error(`Updating activity status failed: ${error.message}`);
   }
 }
@@ -262,7 +389,7 @@ export function getActivityStore(): ActivityStore {
     return cachedRead;
   }
 
-  cachedRead = new SupabaseActivityStore(createDirectoryClient(anonKey as string, url as string));
+  cachedRead = new CanonicalActivityStore(createDirectoryClient(anonKey as string, url as string));
   return cachedRead;
 }
 

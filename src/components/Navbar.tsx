@@ -134,6 +134,12 @@ export default function Navbar({
             {user ? (
               <>
                 <Link
+                  href="/saved"
+                  className={`text-sm font-semibold motion-safe:transition-colors motion-safe:duration-300 px-3 py-2 ${linkClass}`}
+                >
+                  Saved
+                </Link>
+                <Link
                   href="/settings"
                   className={`text-sm font-semibold motion-safe:transition-colors motion-safe:duration-300 px-3 py-2 ${linkClass}`}
                 >
@@ -194,6 +200,13 @@ export default function Navbar({
               <div className="flex flex-col gap-3 mt-4 px-2">
                 {user ? (
                   <>
+                    <Link
+                      href="/saved"
+                      onClick={() => setOpen(false)}
+                      className={`inline-flex items-center justify-center rounded-xl border px-6 py-3.5 text-sm font-semibold transition-colors ${ghostButtonClass}`}
+                    >
+                      Saved
+                    </Link>
                     <Link
                       href="/settings"
                       onClick={() => setOpen(false)}

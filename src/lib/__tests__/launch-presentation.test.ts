@@ -45,22 +45,81 @@ describe('founding offer presentation, not payment configuration', () => {
     expect(launchPlanDisplay(id)).toEqual({ price, period });
   });
 
-  it('shows two unavailable paid offers and a working free directory link', () => {
+  it('shows a disabled Basic preview and an unavailable club offer', () => {
     const html = renderToStaticMarkup(createElement(Pricing));
-    expect(html.match(/Not yet available to purchase/g)).toHaveLength(2);
+    expect(html.match(/Not yet available to purchase/g)).toHaveLength(1);
+    expect(html).toContain('Test checkout not enabled');
+    expect(html).toContain('disabled=""');
+    expect(html).toContain('Save events, clubs, and organizations');
+    expect(html).toContain('Event reminder preferences');
+    expect(html).toContain('No automatic renewal.');
+    expect(html).not.toContain('Planned: save');
+    expect(html).not.toContain('$3/month');
+    expect(html).not.toContain('$49/month');
     expect(html).toContain('href="/activities"');
     expect(html).toContain('One payment for 60 days');
     expect(html).toContain('One payment for 90 days');
     expect(html).toContain('this page cannot accept payment');
     expect(html).toContain('Nothing starts automatically');
+    expect(html).toContain('One payment covers the full founding period. No automatic renewal.');
     expect(html).not.toContain('href="/billing');
     expect(html).not.toContain('No ads, ever');
     expect(html).not.toContain('Price locked');
   });
 
+  it('uses public opening-soon copy for the disabled Basic button in production', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('CQ_STRIPE_TEST_SECRET_KEY', 'sk_test_fixture');
+    vi.stubEnv('CQ_STRIPE_TEST_BASIC_FOUNDING_PRICE_ID', 'price_founding');
+    vi.stubEnv('CQ_STRIPE_TEST_BASIC_FOUNDING_WEBHOOK_SECRET', 'whsec_1234567890123456');
+    const html = renderToStaticMarkup(createElement(Pricing));
+    expect(html).toContain('Purchase opening soon');
+    expect(html).toContain('Preview only. Paid access is not open yet');
+    expect(html).toContain('disabled=""');
+    expect(html).not.toContain('Get Founding Basic');
+    expect(html).not.toContain('href="/billing');
+  });
+
+  it('replaces the purchase button when the signed-in user already has active Basic', () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    vi.stubEnv('CQ_STRIPE_TEST_SECRET_KEY', 'sk_test_fixture');
+    vi.stubEnv('CQ_STRIPE_TEST_BASIC_FOUNDING_PRICE_ID', 'price_founding');
+    vi.stubEnv('CQ_STRIPE_TEST_BASIC_FOUNDING_WEBHOOK_SECRET', 'whsec_1234567890123456');
+    const html = renderToStaticMarkup(createElement(Pricing, { basicActive: true }));
+    expect(html).toContain('Founding Basic active');
+    expect(html).toContain('Manage access');
+    expect(html).toContain('href="/billing"');
+    expect(html).not.toContain('Get Founding Basic');
+    expect(html).toContain('Personalized club and organization recommendations');
+    expect(html.match(/Not yet available to purchase/g)).toHaveLength(1);
+  });
+
+  it('keeps the production purchase closed for a user without active Basic', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const html = renderToStaticMarkup(createElement(Pricing, { basicActive: false }));
+    expect(html).toContain('Purchase opening soon');
+    expect(html).not.toContain('Founding Basic active');
+    expect(html).not.toContain('Get Founding Basic');
+  });
+
+  it('offers one-time local Checkout when the test configuration is complete', () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    vi.stubEnv('CQ_STRIPE_TEST_SECRET_KEY', 'sk_test_fixture');
+    vi.stubEnv('CQ_STRIPE_TEST_BASIC_FOUNDING_PRICE_ID', 'price_founding');
+    vi.stubEnv('CQ_STRIPE_TEST_BASIC_FOUNDING_WEBHOOK_SECRET', 'whsec_1234567890123456');
+    const html = renderToStaticMarkup(createElement(Pricing));
+    expect(html).toContain('Get Founding Basic — $5');
+    expect(html).toContain('Stripe test mode on this local site');
+    expect(html).not.toContain('Preview only. Paid access is not open yet');
+    expect(html).not.toContain('Test checkout not enabled');
+    expect(html.match(/Not yet available to purchase/g)).toHaveLength(1);
+    expect(html).not.toContain('href="/billing');
+    expect(html).not.toContain('mode:"subscription"');
+  });
+
   it('does not imply a filtered search was saved or provide a fake save control', () => {
     const html = renderToStaticMarkup(createElement(FoundingOfferPrompt));
-    expect(html.replace(/\s+/g, ' ')).toContain('has not been saved to your account');
+    expect(html.replace(/\s+/g, ' ')).toContain('Saving a search to your account is not available yet.');
     expect(html).toContain('Bookmark this page in your browser');
     expect(html).toContain('href="/#pricing"');
     expect(html).not.toContain('<button');

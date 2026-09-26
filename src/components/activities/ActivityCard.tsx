@@ -1,7 +1,11 @@
 import { BadgeCheck, CalendarDays, ExternalLink, MapPin, Trophy, Users } from 'lucide-react';
+import ActivityBanner from './ActivityBanner';
+import SaveControl from '@/components/basic/SaveControl';
+import { savedKindForActivity } from '@/lib/basic/saved';
 import type { Activity } from '@/lib/activities/types';
 import { sourceLabel } from '@/lib/activities/types';
 import { formatWhen, kindLabel } from '@/lib/activities/format';
+import { activityImageUrl } from '@/lib/activities/image';
 
 const KIND_ICON = {
   game: Trophy,
@@ -16,9 +20,12 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
   const Icon = KIND_ICON[activity.kind];
   const homeGame = activity.athletics?.home === true;
   const verified = activity.status === 'verified';
+  const image = activityImageUrl(activity.image_url);
 
   return (
-    <article className="group relative flex flex-col h-full rounded-2xl bg-white border border-cream-300 p-5 shadow-soft hover:shadow-lift hover:border-brand-200 transition-all">
+    <article className="group relative flex flex-col h-full overflow-hidden rounded-2xl bg-white border border-cream-300 shadow-soft hover:shadow-lift hover:border-brand-200 transition-all">
+      {image ? <ActivityBanner src={image} /> : null}
+      <div className="flex flex-1 flex-col p-5">
       <div className="flex items-start gap-3">
         <div
           className={`flex items-center justify-center w-10 h-10 shrink-0 rounded-xl ${
@@ -104,6 +111,12 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
             <span className="sr-only">for {activity.name} (opens in a new tab)</span>
           </a>
         ) : null}
+      </div>
+      {savedKindForActivity(activity) ? (
+        <div className="mt-3">
+          <SaveControl activity={activity} />
+        </div>
+      ) : null}
       </div>
     </article>
   );

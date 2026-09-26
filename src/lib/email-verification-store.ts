@@ -13,7 +13,7 @@ export type EmailChallengeRow = {
   invalidated_at: string | null;
 };
 
-const TABLE = 'cq_email_verification_challenges';
+const TABLE = 'campus_email_verification_challenges';
 const SELECT =
   'id, user_id, email, code_hash, expires_at, attempts, created_at, dispatched_at, consumed_at, invalidated_at';
 
@@ -71,47 +71,33 @@ export function createEmailChallengeStore(client: SupabaseClient) {
       codeHash: string;
       at: string;
     }): Promise<boolean> {
-      const { data, error } = await client.rpc('consume_cq_email_challenge', {
+      const { data, error } = await client.rpc('consume_campus_email_challenge_and_verify', {
         p_id: args.id,
         p_user_id: args.userId,
         p_code_hash: args.codeHash,
         p_now: args.at,
       });
-      if (!error) return data === true;
+      if (error) throw new Error(`Could not consume verification challenge: ${error.message}`);
+      return data === true;
+    },
 
-      const { data: row, error: fallbackError } = await client
-        .from(TABLE)
-        .update({ consumed_at: args.at })
-        .eq('id', args.id)
-        .eq('user_id', args.userId)
-        .eq('code_hash', args.codeHash)
-        .is('consumed_at', null)
-        .is('invalidated_at', null)
-        .select('id')
-        .maybeSingle();
-      if (fallbackError) throw new Error(`Could not consume verification challenge: ${fallbackError.message}`);
-      return Boolean(row?.id);
+    async deleteForAccount(userId: string, email: string): Promise<void> {
+      const byUser = await client.from(TABLE).delete().eq('user_id', userId);
+      if (byUser.error) {
+        throw new Error(`Could not delete verification challenges: ${byUser.error.message}`);
+      }
+      const byEmail = await client.from(TABLE).delete().eq('email', email);
+      if (byEmail.error) {
+        throw new Error(`Could not delete verification challenges: ${byEmail.error.message}`);
+      }
     },
 
     async incrementAttempts(id: string): Promise<number> {
-      const { data, error } = await client.rpc('increment_cq_email_challenge_attempts', { p_id: id });
-      if (!error && typeof data === 'number') return data;
-
-      const { data: current, error: readError } = await client
-        .from(TABLE)
-        .select('attempts')
-        .eq('id', id)
-        .single();
-      if (readError || !current) throw new Error(`Could not read verification attempts: ${readError?.message}`);
-      const next = Number(current.attempts ?? 0) + 1;
-      const { error: writeError } = await client
-        .from(TABLE)
-        .update({ attempts: next })
-        .eq('id', id)
-        .is('consumed_at', null)
-        .is('invalidated_at', null);
-      if (writeError) throw new Error(`Could not update verification attempts: ${writeError.message}`);
-      return next;
+      const { data, error } = await client.rpc('increment_campus_email_challenge_attempts', { p_id: id });
+      if (error || typeof data !== 'number') {
+        throw new Error(`Could not update verification attempts: ${error?.message ?? 'unexpected result'}`);
+      }
+      return data;
     },
   };
 }

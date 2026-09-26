@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { ACTIVITY_IMAGE_HOSTS } from './src/lib/activities/image';
 
 const nextConfig: NextConfig = {
   // The Genius Mining module is a workspace package published as TypeScript
@@ -18,6 +19,13 @@ const nextConfig: NextConfig = {
   // server-rendered page looks perfectly fine. Loopback by IP and the container
   // address are both routinely used to reach a dev server, so name them.
   allowedDevOrigins: ['127.0.0.1', 'localhost', '172.30.0.2'],
+
+  images: {
+    remotePatterns: ACTIVITY_IMAGE_HOSTS.map((hostname) => ({
+      protocol: 'https' as const,
+      hostname,
+    })),
+  },
 };
 
 export default nextConfig;

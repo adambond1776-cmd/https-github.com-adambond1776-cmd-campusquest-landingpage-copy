@@ -22,8 +22,20 @@ import {
   createEmailChallengeStore,
   type EmailChallengeRow,
 } from '@/lib/email-verification-store';
+import {
+  ensureUnverifiedProfileShell,
+  isServerAccountVerified,
+} from '@/lib/account/profile';
+import type { AccountRole } from '@/lib/account/authorization';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { normalizeEmail } from '@/lib/signup-email-policy';
+
+export class AuthLookupError extends Error {
+  constructor(message = 'Could not look up that account.') {
+    super(message);
+    this.name = 'AuthLookupError';
+  }
+}
 
 export class EmailVerificationError extends Error {
   constructor(
@@ -65,60 +77,60 @@ function isOpen(row: EmailChallengeRow, now: Date): boolean {
   return !row.consumed_at && !row.invalidated_at && Date.parse(row.expires_at) > now.getTime();
 }
 
+const PREFERENCE_KEYS = ['interests', 'interest_preferences'] as const;
+
+/** Preferences only. Role, plan, and verification flags are not Auth metadata. */
+export function preferenceMetadata(metadata: Record<string, unknown>): Record<string, unknown> {
+  const safe: Record<string, unknown> = {};
+  for (const key of PREFERENCE_KEYS) {
+    if (key in metadata) safe[key] = metadata[key];
+  }
+  return safe;
+}
+
 export async function findAuthUserByEmail(email: string): Promise<User | null> {
   const admin = createAdminClient();
-  if (!admin) return null;
+  if (!admin) throw new AuthLookupError('Supabase admin client is not configured.');
   const target = normalizeEmail(email);
 
-  for (let page = 1; page <= 20; page += 1) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
-    if (error) return null;
-    const match = data.users.find((user) => user.email?.toLowerCase() === target);
-    if (match) return match;
-    if (data.users.length < 200) break;
-  }
+  const { data, error } = await admin.rpc('cq_auth_user_id_by_email', { p_email: target });
+  if (error) throw new AuthLookupError('Could not look up that account.');
+  if (data == null || data === '') return null;
 
-  return null;
+  const { data: loaded, error: loadError } = await admin.auth.admin.getUserById(String(data));
+  if (loadError) throw new AuthLookupError('Could not look up that account.');
+  return loaded.user ?? null;
 }
 
 export async function createPendingAuthUser(args: {
   email: string;
+  role: AccountRole;
   metadata: Record<string, unknown>;
 }): Promise<User> {
   const admin = createAdminClient();
   if (!admin) throw new Error('Supabase admin client is not configured.');
 
   const password = randomBytes(32).toString('base64url');
+  const email = normalizeEmail(args.email);
   const { data, error } = await admin.auth.admin.createUser({
-    email: normalizeEmail(args.email),
+    email,
     password,
     email_confirm: true,
-    user_metadata: {
-      ...args.metadata,
-      campus_email_pending: true,
-      campus_email_verified_at: null,
-    },
+    user_metadata: preferenceMetadata(args.metadata),
   });
 
   if (error || !data.user?.id) {
     throw new Error(error?.message ?? 'Unable to create account.');
   }
-  return data.user;
-}
 
-export async function markCampusEmailVerified(userId: string, at: string): Promise<void> {
-  const admin = createAdminClient();
-  if (!admin) throw new Error('Supabase admin client is not configured.');
-  const { data: current, error: readError } = await admin.auth.admin.getUserById(userId);
-  if (readError || !current.user) throw new Error('Unable to load the account.');
-  const { error } = await admin.auth.admin.updateUserById(userId, {
-    user_metadata: {
-      ...(current.user.user_metadata ?? {}),
-      campus_email_pending: false,
-      campus_email_verified_at: at,
-    },
-  });
-  if (error) throw new Error('Unable to mark the email verified.');
+  try {
+    await ensureUnverifiedProfileShell(admin, data.user.id);
+  } catch (profileError) {
+    await admin.auth.admin.deleteUser(data.user.id);
+    throw profileError;
+  }
+
+  return data.user;
 }
 
 export async function sendCampusEmailCode(args: {
@@ -225,18 +237,20 @@ export async function verifyCampusEmailCode(args: {
     throw new EmailVerificationError(CAMPUS_EMAIL_USER_MESSAGES.incorrect, 'incorrect');
   }
 
+  await ensureUnverifiedProfileShell(admin, args.userId);
+  const verifiedAt = now.toISOString();
   const consumed = await store.consumeIfHashMatches({
     id: candidate.id,
     userId: args.userId,
     codeHash: submittedHash,
-    at: now.toISOString(),
+    at: verifiedAt,
   });
   if (!consumed) {
     throw new EmailVerificationError(CAMPUS_EMAIL_USER_MESSAGES.invalidated, 'invalidated');
   }
-
-  const verifiedAt = now.toISOString();
-  await markCampusEmailVerified(args.userId, verifiedAt);
+  if (!(await isServerAccountVerified(args.userId))) {
+    throw new EmailVerificationError(CAMPUS_EMAIL_USER_MESSAGES.incorrect, 'incorrect');
+  }
   return { ok: true, verifiedAt };
 }
 

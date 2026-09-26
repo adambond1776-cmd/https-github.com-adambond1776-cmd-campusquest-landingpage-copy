@@ -53,6 +53,8 @@ create unique index if not exists cq_reports_no_duplicates
 alter table cq_activity_reports enable row level security;
 -- No policy: reports are written and read by the service role only. A student
 -- seeing other students' reports would turn the queue into a noticeboard.
+revoke all on table cq_activity_reports from anon, authenticated;
+grant all on table cq_activity_reports to service_role;
 
 -- ---------------------------------------------------------------------------
 -- Age and guardian consent
@@ -99,3 +101,5 @@ create index if not exists cq_age_token_idx
 
 alter table cq_age_records enable row level security;
 -- No policy: written and read by the service role only.
+revoke all on table cq_age_records from anon, authenticated;
+grant all on table cq_age_records to service_role;

@@ -13,7 +13,7 @@ beforeAll(async () => {
     create schema auth; create table auth.users(id uuid primary key);
     grant usage on schema public to anon,authenticated,service_role;`);
   for (const migration of ['0004_activities.sql','0007_test_billing.sql','0008_clubs_test.sql']) {
-    await db.exec(await readFile(`supabase/migrations/${migration}`, 'utf8'));
+    await db.exec(await readFile(`supabase/legacy-copy-migrations/${migration}`, 'utf8'));
   }
   await db.exec('grant select on cq_activities to anon,authenticated;');
 }, 30000);

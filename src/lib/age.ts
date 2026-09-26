@@ -44,7 +44,7 @@ export type GuardianConsent = {
   guardian_email: string;
   /** When the student asked us to email their guardian. */
   requested_at: string;
-  /** Null until the guardian follows the link and affirms. */
+  /** Null until the guardian submits the confirmation. Loading the link does not set this. */
   consented_at: string | null;
   /** SHA-256 of the emailed token. The raw token is never stored. */
   token_hash: string;

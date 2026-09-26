@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function QuestionnairePage() {
-  const access = await requireGeniusMiningAccess();
+  const access = await requireGeniusMiningAccess('/genius-mining/questionnaire');
   if (!access.allowed) return <AgeLocked reason={access.reason} />;
 
   const identity = await currentIdentity();

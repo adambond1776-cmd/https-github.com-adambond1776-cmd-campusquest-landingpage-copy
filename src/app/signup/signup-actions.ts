@@ -2,11 +2,11 @@
 
 import { randomBytes } from 'node:crypto';
 import { recordAge } from '@/app/signup/age-actions';
-import { bracketForBirthYear } from '@/lib/age';
 import type { SignupStartInput, SignupStartResult, VerifyCodeResult } from '@/lib/signup-types';
+import { ensureUnverifiedProfileShell, isServerAccountVerified } from '@/lib/account/profile';
+import { sessionPrivileges } from '@/lib/session';
 import {
   CAMPUS_EMAIL_USER_MESSAGES,
-  isCampusEmailVerified,
   maskCampusEmail,
 } from '@/lib/email-verification';
 import {
@@ -78,26 +78,18 @@ export async function startCampusSignup(input: SignupStartInput): Promise<Signup
       if (domainError) return { ok: false, message: domainError };
     }
 
-    const recorded = await recordAge({
-      email,
-      birthYear: input.birthYear,
-      guardianName: input.guardianName,
-      guardianEmail: input.guardianEmail,
-    });
-
-    if (!recorded.ok) {
-      const skippable =
-        (recorded.kind === 'database' || recorded.kind === 'configuration') &&
-        bracketForBirthYear(input.birthYear) === 'adult';
-      if (!skippable) return { ok: false, message: recorded.message };
-      logSignupFailure({ stage: 'record_age_optional', kind: recorded.kind ?? 'database' });
-    }
-
     if (!persistConfigured()) {
       if (isProductionRuntime()) {
         logSignupFailure({ stage: 'start_signup', kind: 'configuration' });
         return { ok: false, message: AUTH_UNCONFIGURED_MESSAGE };
       }
+      const recorded = await recordAge({
+        email,
+        birthYear: input.birthYear,
+        guardianName: input.guardianName,
+        guardianEmail: input.guardianEmail,
+      });
+      if (!recorded.ok) return { ok: false, message: recorded.message };
       logSignupSuccess('start_signup_mock');
       return {
         ok: true,
@@ -115,7 +107,7 @@ export async function startCampusSignup(input: SignupStartInput): Promise<Signup
 
     const existing = await findAuthUserByEmail(email);
     if (existing) {
-      if (isCampusEmailVerified(existing.user_metadata)) {
+      if (await isServerAccountVerified(existing.id)) {
         return {
           ok: false,
           message: CAMPUS_EMAIL_USER_MESSAGES.alreadyRegistered,
@@ -133,13 +125,23 @@ export async function startCampusSignup(input: SignupStartInput): Promise<Signup
       };
     }
 
+    const recorded = await recordAge({
+      email,
+      birthYear: input.birthYear,
+      guardianName: input.guardianName,
+      guardianEmail: input.guardianEmail,
+    });
+
+    if (!recorded.ok) {
+      return { ok: false, message: recorded.message };
+    }
+
     const user = await createPendingAuthUser({
       email,
+      role: input.role,
       metadata: {
-        role: input.role,
         interests: interests.interests,
         ...(input.interestPreferences ? { interest_preferences: interests.profile } : {}),
-        plan: input.plan,
       },
     });
 
@@ -180,7 +182,7 @@ export async function resendCampusSignupCode(email: string): Promise<SignupStart
 
     const user = await findAuthUserByEmail(normalized);
     if (!user) return { ok: false, message: CAMPUS_EMAIL_USER_MESSAGES.missing };
-    if (isCampusEmailVerified(user.user_metadata)) {
+    if (await isServerAccountVerified(user.id)) {
       return { ok: false, message: CAMPUS_EMAIL_USER_MESSAGES.alreadyVerified };
     }
 
@@ -213,17 +215,22 @@ export async function verifyCampusSignupCode(input: {
       return { ok: true };
     }
 
-    const user = await findAuthUserByEmail(email);
-    if (!user) return { ok: false, message: CAMPUS_EMAIL_USER_MESSAGES.missing };
+    const session = await sessionPrivileges();
+    const sessionMatch =
+      session.state === 'signed-in' && normalizeEmail(session.email) === email ? session.userId : null;
+    const userId = sessionMatch ?? (await findAuthUserByEmail(email))?.id ?? null;
+    if (!userId) return { ok: false, message: CAMPUS_EMAIL_USER_MESSAGES.missing };
 
-    if (isCampusEmailVerified(user.user_metadata)) {
-      const signedIn = await establishSession(user.id, email);
+    if (await isServerAccountVerified(userId)) {
+      if (sessionMatch === userId) return { ok: true };
+      const signedIn = await establishSession(userId, email);
       if (!signedIn) return { ok: false, message: SIGNUP_CODE_RETRY_MESSAGE };
       return { ok: true };
     }
 
-    await verifyCampusEmailCode({ userId: user.id, email, code: input.code });
-    const signedIn = await establishSession(user.id, email);
+    await verifyCampusEmailCode({ userId, email, code: input.code });
+    if (sessionMatch === userId) return { ok: true };
+    const signedIn = await establishSession(userId, email);
     if (!signedIn) {
       logSignupFailure({ stage: 'verify_signup_session', kind: 'supabase_auth' });
       return { ok: false, message: SIGNUP_CODE_RETRY_MESSAGE };
@@ -235,4 +242,78 @@ export async function verifyCampusSignupCode(input: {
     logSignupFailure({ stage: 'verify_signup_code', kind: classifySignupError(error) });
     return { ok: false, message: asVerificationMessage(error) };
   }
+}
+
+/**
+ * Sends a campus code to the signed-in account. Does not create an Auth user,
+ * replace a profile, or rewrite age and interests.
+ */
+export async function startExistingAccountVerification(): Promise<
+  | { ok: true; alreadyVerified: true; emailMasked: string }
+  | { ok: true; alreadyVerified: false; mock: boolean; emailMasked: string }
+  | { ok: false; message: string }
+> {
+  try {
+    const session = await sessionPrivileges();
+    if (session.state !== 'signed-in') {
+      return { ok: false, message: 'Sign in before verifying your URI email.' };
+    }
+    if (session.privileges.verified) {
+      return { ok: true, alreadyVerified: true, emailMasked: maskCampusEmail(session.email) };
+    }
+
+    const domainError = studentSignupEmailRejection(session.email);
+    if (domainError) return { ok: false, message: domainError };
+
+    if (!persistConfigured()) {
+      if (isProductionRuntime()) return { ok: false, message: AUTH_UNCONFIGURED_MESSAGE };
+      return {
+        ok: true,
+        alreadyVerified: false,
+        mock: true,
+        emailMasked: maskCampusEmail(session.email),
+      };
+    }
+
+    const admin = createAdminClient();
+    if (!admin) return { ok: false, message: AUTH_UNCONFIGURED_MESSAGE };
+    await ensureUnverifiedProfileShell(admin, session.userId);
+
+    try {
+      const sent = await sendCampusEmailCode({ userId: session.userId, email: session.email });
+      return {
+        ok: true,
+        alreadyVerified: false,
+        mock: false,
+        emailMasked: sent.emailMasked,
+      };
+    } catch (error) {
+      if (error instanceof EmailVerificationError && (error.code === 'cooldown' || error.code === 'rate_limit')) {
+        return {
+          ok: true,
+          alreadyVerified: false,
+          mock: false,
+          emailMasked: maskCampusEmail(session.email),
+        };
+      }
+      throw error;
+    }
+  } catch (error) {
+    logSignupFailure({ stage: 'start_existing_verification', kind: classifySignupError(error) });
+    return { ok: false, message: asVerificationMessage(error) };
+  }
+}
+
+/**
+ * The signup wizard's student/organization choice is presentation only.
+ * It is not written to profiles.role and it does not authorize club tools,
+ * billing, or any other sensitive action.
+ */
+export async function saveAccountRole(
+  role: 'student' | 'organization'
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  if (role !== 'student' && role !== 'organization') {
+    return { ok: false, message: 'Choose student or organization.' };
+  }
+  return { ok: true };
 }

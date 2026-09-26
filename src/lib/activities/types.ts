@@ -22,6 +22,8 @@ export type SourceId =
   | 'engage'
   /** The athletics department schedule. Sidearm Sports, published iCal. */
   | 'athletics'
+  /** Imported by the main CampusQuest app from URInvolved. */
+  | 'urinvolved'
   /** Hand-entered and confirmed by a person. */
   | 'curated'
   /** Suggested by a student. Never public before review. */
@@ -95,6 +97,8 @@ export type Activity = {
   name: string;
   /** One or two sentences. What a student reads in the list. */
   summary: string | null;
+  /** Hosting group from the canonical event row. Used for interest matching. */
+  organization_name?: string | null;
   categories: string[];
   scope: 'on_campus' | 'off_campus';
   location: string | null;
@@ -178,6 +182,8 @@ export function sourceLabel(source: SourceId): string {
       return 'Student organization directory';
     case 'athletics':
       return 'Athletics department';
+    case 'urinvolved':
+      return 'URInvolved';
     case 'curated':
       return 'Confirmed by CampusQuest';
     case 'submitted':

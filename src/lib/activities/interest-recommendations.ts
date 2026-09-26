@@ -1,4 +1,4 @@
-import { interestOption, normalizeInterestProfile, type Interest, type InterestId } from '@/lib/interests';
+import { interestOption, normalizeInterestProfile, type InterestId } from '@/lib/interests';
 import type { Activity } from './types';
 
 type Rule = { categories?: string[]; words: string[] };
@@ -62,7 +62,7 @@ function current(activity: Activity, now: number): boolean {
 }
 
 export type InterestRecommendation = {
-  activity: Activity; matchedInterests: Interest[]; matchedDetails: string[]; score: number; reason: string;
+  activity: Activity; matchedInterests: string[]; matchedDetails: string[]; score: number; reason: string;
 };
 
 /**
@@ -106,4 +106,218 @@ export function recommendByInterests(
     || (a.activity.starts_at ? Date.parse(a.activity.starts_at) : Infinity) - (b.activity.starts_at ? Date.parse(b.activity.starts_at) : Infinity)
     || a.activity.name.localeCompare(b.activity.name) || a.activity.id.localeCompare(b.activity.id)
   ).slice(0, Math.floor(limit));
+}
+
+/**
+ * Internal keyword map for official CampusQuest interests.
+ * The visible reason always uses the saved label, never these words.
+ * A single weak word is not enough to recommend a listing.
+ */
+const DIRECTORY_RULES: Record<InterestId, { strong: string[]; weak: string[]; categories: string[] }> = {
+  music: { strong: ['music', 'musical', 'concert', 'choir', 'singing'], weak: ['band'], categories: [] },
+  performance: { strong: ['dance', 'dancing', 'theater', 'theatre', 'theatrical', 'comedy', 'improv', 'choreography', 'ballet'], weak: ['performing', 'performance'], categories: [] },
+  arts: { strong: ['photography', 'photographer', 'film', 'cinema', 'painting', 'design'], weak: ['art', 'arts', 'writing'], categories: ['Film / Media Screenings', 'Student Media'] },
+  gaming: { strong: ['gaming', 'esports', 'anime', 'chess', 'tabletop'], weak: ['gamers'], categories: [] },
+  'play-sports': {
+    strong: ['intramural', 'intramurals', 'recreation', 'recreational', 'athletics', 'basketball', 'soccer', 'football', 'volleyball', 'tennis', 'hockey', 'swimming', 'baseball', 'softball', 'lacrosse', 'rugby', 'rowing', 'wrestling', 'gymnastics', 'golf'],
+    weak: ['sport', 'sports', 'team'],
+    categories: ['Athletics', 'Athletics / Recreation', 'Club Sport'],
+  },
+  'watch-sports': { strong: ['watch party', 'spectator'], weak: [], categories: [] },
+  wellbeing: { strong: ['fitness', 'wellbeing', 'wellness', 'yoga', 'meditation'], weak: ['exercise'], categories: [] },
+  outdoors: { strong: ['outdoor', 'outdoors', 'hiking', 'camping', 'wildlife', 'nature', 'trail', 'kayak', 'kayaking', 'sailing', 'surfing', 'climbing'], weak: ['outing'], categories: [] },
+  travel: { strong: ['study abroad', 'travel'], weak: ['trips', 'excursion'], categories: [] },
+  academic: {
+    strong: ['academic', 'economics', 'finance', 'engineering', 'science', 'research', 'tutoring', 'tutor', 'study group', 'lecture', 'seminar', 'scholarship', 'laboratory'],
+    weak: ['study'],
+    categories: ['Academic'],
+  },
+  technology: { strong: ['technology', 'coding', 'programming', 'robotics', 'hackathon', 'computer'], weak: ['tech'], categories: [] },
+  career: {
+    strong: ['career', 'careers', 'internship', 'recruiting', 'job fair', 'entrepreneurship', 'entrepreneur', 'startup', 'business'],
+    weak: ['professional'],
+    categories: ['Careers / Job Fairs', 'Business Enterprise'],
+  },
+  service: { strong: ['volunteer', 'volunteering', 'community service', 'service learning', 'mentoring', 'fundraiser', 'fundraising'], weak: ['service'], categories: ['Service', 'Community Engagement'] },
+  leadership: { strong: ['leadership', 'advocacy', 'student government', 'civic'], weak: ['activism'], categories: ['Governance'] },
+  environment: { strong: ['environment', 'environmental', 'sustainability', 'conservation'], weak: [], categories: [] },
+  culture: { strong: ['culture', 'cultural', 'language', 'languages', 'international', 'multicultural', 'intercultural'], weak: [], categories: ['Multicultural'] },
+  faith: { strong: ['faith', 'spirituality', 'religious', 'interfaith'], weak: [], categories: ['Religious/Spiritual'] },
+  social: { strong: ['meetup', 'homecoming'], weak: ['social', 'hobby', 'hobbies'], categories: ['Social / Gatherings'] },
+};
+
+const CAREER_CATEGORIES = new Set(['careers / job fairs', 'business enterprise']);
+const MEANINGFUL_MATCH_SCORE = 3;
+
+const PUBLIC_RECOMMENDATION_STATUSES = new Set(['listed', 'verified']);
+
+function isClubListing(activity: Activity): boolean {
+  return activity.kind === 'organization' && contains(recommendationText(activity), ['club', 'clubs']);
+}
+
+export const RECOMMENDATION_PAGE_SIZE = 6;
+/** Qualified matches available to Show more. The match threshold is unchanged. */
+export const RECOMMENDATION_POOL_LIMIT = 60;
+
+export type RecommendationCategoryFilter = 'all' | 'clubs' | 'events' | 'organizations';
+
+/** Clubs, events (including athletics), or other organizations. Matching scores are unchanged. */
+export function recommendationCategory(activity: Activity): Exclude<RecommendationCategoryFilter, 'all'> | null {
+  if (activity.kind === 'event' || activity.kind === 'game') return 'events';
+  if (isClubListing(activity)) return 'clubs';
+  if (activity.kind === 'organization') return 'organizations';
+  return null;
+}
+
+export function matchesRecommendationFilter(activity: Activity, filter: RecommendationCategoryFilter): boolean {
+  if (filter === 'all') return true;
+  return recommendationCategory(activity) === filter;
+}
+
+/**
+ * Personalized clubs and organizations require an active Basic window.
+ * Public events stay visible. The caller must pass the server-read entitlement.
+ */
+export function recommendationsForBasicAccess<T extends { activity: Activity }>(
+  recommendations: T[],
+  basicActive: boolean,
+): T[] {
+  if (basicActive) return recommendations;
+  return recommendations.filter((item) => recommendationCategory(item.activity) === 'events');
+}
+
+const MIX_SLOTS: Array<(activity: Activity) => boolean> = [
+  (activity) => activity.kind === 'event',
+  (activity) => isClubListing(activity),
+  (activity) => activity.kind === 'organization' && !isClubListing(activity),
+  (activity) => activity.kind === 'game',
+];
+
+function savedInterest(value: string): { label: string; id: InterestId | null; strong: string[]; weak: string[]; categories: string[] } | null {
+  const label = value.trim();
+  if (!label) return null;
+  const option = interestOption(label) ?? INTEREST_OPTIONS_BY_LABEL.get(label);
+  if (!option) {
+    return { label, id: null, strong: [label], weak: [], categories: [] };
+  }
+  const rule = DIRECTORY_RULES[option.id];
+  return { label: option.label, id: option.id, strong: rule.strong, weak: rule.weak, categories: rule.categories };
+}
+
+const INTEREST_OPTIONS_BY_LABEL = new Map<string, NonNullable<ReturnType<typeof interestOption>>>();
+for (const id of ['music', 'performance', 'arts', 'gaming', 'play-sports', 'watch-sports', 'wellbeing', 'outdoors', 'travel', 'academic', 'technology', 'career', 'service', 'leadership', 'environment', 'culture', 'faith', 'social'] as const) {
+  const option = interestOption(id);
+  if (option) INTEREST_OPTIONS_BY_LABEL.set(option.label, option);
+}
+
+function recommendationText(activity: Activity): string {
+  return tokens([
+    activity.name,
+    activity.summary ?? '',
+    activity.organization_name ?? '',
+    activity.categories.join(' '),
+    activity.athletics?.sport ?? '',
+    activity.athletics?.opponent ?? '',
+  ].join(' ')).replace(/\bmartial arts?\b/g, ' ');
+}
+
+function mixRecommendations(ranked: InterestRecommendation[], limit: number): InterestRecommendation[] {
+  const picked: InterestRecommendation[] = [];
+  const used = new Set<string>();
+  const usedInterests = new Set<string>();
+  const take = (item: InterestRecommendation) => {
+    picked.push(item);
+    used.add(item.activity.id);
+    usedInterests.add(item.matchedInterests[0] ?? '');
+  };
+  for (const matchesSlot of MIX_SLOTS) {
+    const unusedInterest = ranked.find((item) =>
+      matchesSlot(item.activity) && !used.has(item.activity.id) && !usedInterests.has(item.matchedInterests[0] ?? ''));
+    const next = unusedInterest ?? ranked.find((item) => matchesSlot(item.activity) && !used.has(item.activity.id));
+    if (next) take(next);
+  }
+  for (const item of ranked) {
+    if (picked.length >= limit) break;
+    if (used.has(item.activity.id) || usedInterests.has(item.matchedInterests[0] ?? '')) continue;
+    take(item);
+  }
+  for (const item of ranked) {
+    if (picked.length >= limit) break;
+    if (used.has(item.activity.id)) continue;
+    take(item);
+  }
+  return picked.slice(0, limit);
+}
+
+/**
+ * Personalized directory picks from the public canonical listings.
+ * Listed and verified rows are eligible. Hidden, stale, pending, cancelled,
+ * and duplicate aliases are not, because those never reach this list as public.
+ */
+export function recommendDirectoryByInterests(
+  activities: Activity[],
+  savedInterests: unknown,
+  campusId: string,
+  now = new Date(),
+  limit = 6,
+): InterestRecommendation[] {
+  const raw = Array.isArray(savedInterests) ? savedInterests : [];
+  const interests = raw.flatMap((value) => {
+    if (typeof value !== 'string') return [];
+    const described = savedInterest(value);
+    return described ? [described] : [];
+  });
+  if (!interests.length || !Number.isFinite(now.getTime()) || !Number.isFinite(limit) || limit <= 0) return [];
+
+  const seen = new Set<string>();
+  const ranked = activities.flatMap((activity): InterestRecommendation[] => {
+    if (seen.has(activity.id)) return [];
+    seen.add(activity.id);
+    if (activity.campus_id !== campusId) return [];
+    if (!PUBLIC_RECOMMENDATION_STATUSES.has(activity.status)) return [];
+    if (!current(activity, now.getTime())) return [];
+
+    const text = recommendationText(activity);
+    const careerCategory = activity.categories.some((category) => CAREER_CATEGORIES.has(category.toLowerCase()));
+    const careerPhrase = text.includes(tokens('career'))
+      || text.includes(tokens('careers'))
+      || text.includes(tokens('job fair'));
+    const matches = interests.flatMap((interest) => {
+      const strongHits = interest.strong.filter((word) => text.includes(tokens(word))).length;
+      const weakHits = interest.weak.filter((word) => text.includes(tokens(word))).length;
+      const categoryHit = interest.categories.some((category) =>
+        activity.categories.some((value) => value.toLowerCase() === category.toLowerCase())) ? 1 : 0;
+      const incidentalCareer = interest.id !== 'career'
+        && (careerCategory || (careerPhrase && categoryHit === 0 && strongHits < 2));
+      if (incidentalCareer) return [];
+      const matchScore = strongHits * 3 + categoryHit * 4 + weakHits;
+      if (matchScore < MEANINGFUL_MATCH_SCORE) return [];
+      return [{ ...interest, matchScore, strongHits }];
+    }).sort((a, b) => b.matchScore - a.matchScore || b.strongHits - a.strongHits || a.label.localeCompare(b.label));
+    if (!matches.length) return [];
+
+    const strongest = matches[0];
+    const upcoming = Boolean(activity.starts_at);
+    return [{
+      activity,
+      score: strongest.matchScore + (upcoming ? 0.2 : 0),
+      matchedInterests: [strongest.label],
+      matchedDetails: [],
+      reason: `Because you’re interested in “${strongest.label}”`,
+    }];
+  }).sort((a, b) => b.score - a.score
+    || (a.activity.starts_at ? Date.parse(a.activity.starts_at) : Infinity) - (b.activity.starts_at ? Date.parse(b.activity.starts_at) : Infinity)
+    || a.activity.name.localeCompare(b.activity.name)
+    || a.activity.id.localeCompare(b.activity.id));
+
+  const uniqueNames: InterestRecommendation[] = [];
+  const names = new Set<string>();
+  for (const item of ranked) {
+    const nameKey = item.activity.name.trim().toLowerCase();
+    if (names.has(nameKey)) continue;
+    names.add(nameKey);
+    uniqueNames.push(item);
+  }
+
+  return mixRecommendations(uniqueNames, Math.floor(limit));
 }

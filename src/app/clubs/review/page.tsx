@@ -2,9 +2,11 @@ import { notFound } from 'next/navigation';
 import ClubReview from '@/components/clubs/ClubReview';
 import { clubIdentity } from '@/lib/clubs/identity';
 import { clubRepository } from '@/lib/clubs/store';
+import { redirectIfCampusEmailUnverified } from '@/lib/gate';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Club review | CampusQuest', robots: { index: false, follow: false } };
 export default async function ClubReviewPage() {
+  await redirectIfCampusEmailUnverified('/clubs/review');
   try { await clubIdentity('review'); } catch { notFound(); }
   const repo = clubRepository();
   const rows = [];

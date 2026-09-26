@@ -26,6 +26,7 @@ create index if not exists cq_email_verif_active_idx
 alter table cq_email_verification_challenges enable row level security;
 -- No anon/authenticated policies. Ordinary clients cannot read hashes.
 -- Service role bypasses RLS for server-side send/verify.
+revoke all on table cq_email_verification_challenges from anon, authenticated;
 grant all on table cq_email_verification_challenges to service_role;
 
 create or replace function public.increment_cq_email_challenge_attempts(p_id uuid)

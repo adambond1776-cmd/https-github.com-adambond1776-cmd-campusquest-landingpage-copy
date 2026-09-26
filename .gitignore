@@ -28,6 +28,10 @@ yarn-error.log*
 !.vscode/extensions.json
 .idea
 
+# Supabase CLI local link state. Contains pooler URLs and must stay untracked.
+supabase/.temp/
+supabase/.branches/
+
 .env.local
 .env*.local
 .env*

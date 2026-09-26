@@ -3,6 +3,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ClubWorkspace from '@/components/clubs/ClubWorkspace';
 import { clubIdentity } from '@/lib/clubs/identity';
+import { redirectIfCampusEmailUnverified } from '@/lib/gate';
 import { clubRepository } from '@/lib/clubs/store';
 import { clubService } from '@/lib/clubs/service';
 import { stripeClubBilling } from '@/lib/clubs/billing';
@@ -12,6 +13,7 @@ import { manageClub } from './actions';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Club workspace | CampusQuest', robots: { index: false, follow: false } };
 export default async function ClubManagePage() {
+  await redirectIfCampusEmailUnverified('/clubs/manage');
   let view: ClubView | null = null, message = '';
   try { view = await clubService(clubRepository(), stripeClubBilling).view(await clubIdentity()); }
   catch (error) { message = error instanceof ClubError ? error.message : 'Club tools are unavailable. No account or paid access was assumed.'; }
