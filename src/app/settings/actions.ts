@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { deleteAccount } from '@/lib/account/delete';
+import { isDemoAccountEmail } from '@/lib/account/demo-account';
 
 export type DeleteResult = { ok: true } | { ok: false; message: string };
 
@@ -29,6 +30,9 @@ export async function deleteMyAccount(confirmation: string): Promise<DeleteResul
   const { data } = await supabase.auth.getUser();
   const user = data.user;
   if (!user?.email) return { ok: false, message: 'Sign in first.' };
+  if (isDemoAccountEmail(user.email)) {
+    return { ok: false, message: 'Account deletion is not available for this sign-in.' };
+  }
 
   const result = await deleteAccount({ email: user.email, userId: user.id });
   if (result.authUserDeleted) {

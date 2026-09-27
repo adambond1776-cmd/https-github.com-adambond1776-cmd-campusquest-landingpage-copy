@@ -7,6 +7,7 @@ import {
   foundingLocalCheckoutConfigured,
   type FoundingCheckoutFacts,
 } from '@/lib/basic/founding';
+import { isDemoAccountEmail } from '@/lib/account/demo-account';
 
 export function foundingStripe(): Stripe {
   return new Stripe(foundingBillingConfig().secret, { timeout: 15000, maxNetworkRetries: 0 });
@@ -40,6 +41,7 @@ export function factsFromStripe(
 }
 
 export async function createFoundingCheckout(userId: string, email: string): Promise<string> {
+  if (isDemoAccountEmail(email)) throw new Error('Founding checkout is not available for this account.');
   if (!foundingLocalCheckoutConfigured()) throw new Error('Founding checkout is closed.');
   const entitlement = await loadOwnBasicEntitlement();
   if (entitlement.active) throw new Error('Founding Basic is already active.');

@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { isDemoAccountEmail } from '@/lib/account/demo-account';
 import { BILLING_PLANS, EMPTY_SUBSCRIPTION, isPaidPlan, type BillingStatus, type BillingScope, type SubscriptionPlan, type SubscriptionView } from './catalog';
 import { testBillingConfig } from './config';
 import { billingCustomer, bindBillingCustomer, withBillingLock } from './store';
@@ -67,6 +68,7 @@ export async function readTestSubscription(userId: string, scope: BillingScope =
 }
 
 export async function startTestCheckout(userId: string, email: string, plan: SubscriptionPlan, scope: BillingScope = 'student'): Promise<string> {
+  if (isDemoAccountEmail(email)) throw new Error('Founding checkout is not available for this account.');
   if (scope === 'club' ? plan !== 'club' : !isPaidPlan(plan)) throw new Error('Choose a plan for this account type.');
   const config = testBillingConfig(scope);
   const stripe = testStripe(scope);

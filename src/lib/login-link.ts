@@ -1,5 +1,6 @@
 import { loginDiagnosticFromError, logLoginDiagnostic } from '@/lib/login-diagnostics';
 import { safeReturnPath } from '@/lib/return-path';
+import { productionAuthOrigin } from '@/lib/site';
 
 export const LOGIN_NO_ACCOUNT_MESSAGE =
   'No CampusQuest account uses that email yet. Sign up to create one.';
@@ -56,8 +57,8 @@ export function loginCallbackUrl(args: {
   let origin: string | null;
 
   if (args.production) {
-    if (!configured || isLocalOrigin(configured)) return null;
-    origin = configured;
+    origin = productionAuthOrigin(configured ?? undefined);
+    if (!origin) return null;
   } else if (browser && isLocalOrigin(browser)) {
     origin = browser;
   } else {

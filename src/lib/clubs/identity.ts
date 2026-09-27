@@ -4,6 +4,7 @@ import { loadAccountForSessionUser } from '@/lib/account/profile';
 import { ageStore } from '@/lib/age-store';
 import { allows } from '@/lib/age';
 import { ClubError } from './model';
+import { isDemoAccountEmail } from '@/lib/account/demo-account';
 
 export type ClubActor = { id: string; email: string; organization: boolean; reviewer: boolean };
 export function assertClubTestMode() {
@@ -16,6 +17,7 @@ export async function clubIdentity(capability: 'owner' | 'join' | 'review' = 'ow
   const { data, error } = await db.auth.getUser();
   const user = data.user;
   if (error || !user?.id || !user.email) throw new ClubError('Sign in before using club tools.');
+  if (isDemoAccountEmail(user.email)) throw new ClubError('Club tools are not available for this account.');
   const profile = await loadAccountForSessionUser(db, user.id);
   const privileges = accountPrivileges(profile, user.user_metadata ?? {});
   if (!privileges.verified) throw new ClubError('Verify your email before using club tools.');

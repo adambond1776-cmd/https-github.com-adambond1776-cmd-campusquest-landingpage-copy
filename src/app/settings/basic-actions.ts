@@ -6,6 +6,7 @@ import { localBasicGrantAllowed, localBasicWindow } from '@/lib/basic/entitlemen
 import { isProductionRuntime } from '@/lib/runtime';
 import { sessionPrivileges } from '@/lib/session';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isDemoAccountEmail } from '@/lib/account/demo-account';
 
 export type LocalBasicResult = { ok: true; message: string } | { ok: false; message: string };
 
@@ -64,6 +65,7 @@ async function localGrantSession(): Promise<
   if (!localBasicGrantAllowed(isProductionRuntime())) return { ok: false, message: REFUSED };
   const session = await sessionPrivileges();
   if (session.state !== 'signed-in') return { ok: false, message: 'Sign in before granting local Basic access.' };
+  if (isDemoAccountEmail(session.email)) return { ok: false, message: REFUSED };
   if (!session.privileges.verified) {
     return { ok: false, message: 'Verify your campus email before granting local Basic access.' };
   }

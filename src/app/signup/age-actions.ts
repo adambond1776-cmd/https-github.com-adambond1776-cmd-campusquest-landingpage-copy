@@ -11,7 +11,7 @@ import { sendGuardianRequest, sendOperatorAlert } from '@/lib/alerts';
 import { alertsConfigured } from '@/lib/env';
 import { PRIVACY_VERSION, TERMS_VERSION, legalEntity } from '@/lib/legal';
 import { isProductionRuntime } from '@/lib/runtime';
-import { LOCAL_DEV_ORIGIN, publicOrigin } from '@/lib/site';
+import { LOCAL_DEV_ORIGIN, productionAuthOrigin, publicOrigin } from '@/lib/site';
 import {
   classifySignupError,
   logSignupFailure,
@@ -106,7 +106,9 @@ async function recordAgeUnchecked(input: {
     };
   }
 
-  const origin = publicOrigin() ?? (isProductionRuntime() ? undefined : LOCAL_DEV_ORIGIN);
+  const origin = isProductionRuntime()
+    ? productionAuthOrigin(publicOrigin())
+    : (publicOrigin() ?? LOCAL_DEV_ORIGIN);
   if (!origin) {
     logSignupFailure({ stage: 'guardian_email', kind: 'configuration' });
     return {

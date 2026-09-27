@@ -9,6 +9,7 @@ import FinalCTA from '@/components/FinalCTA';
 import Footer from '@/components/Footer';
 import SponsorBanner from '@/components/SponsorBanner';
 import { ACTIVE_SPONSOR } from '@/lib/launch-offers';
+import { isDemoAccountEmail } from '@/lib/account/demo-account';
 import { loadOwnBasicEntitlement } from '@/lib/basic/store';
 import { signedInUser } from '@/lib/session';
 
@@ -25,7 +26,7 @@ export default async function LandingPage() {
         <ForStudents />
         <ForOrganizations />
         <HowItWorks />
-        <Pricing basicActive={basic?.active === true} />
+        <Pricing basicActive={basic?.active === true} purchasesBlocked={isDemoAccountEmail(user?.email)} />
         <FinalCTA />
       </main>
       <Footer />

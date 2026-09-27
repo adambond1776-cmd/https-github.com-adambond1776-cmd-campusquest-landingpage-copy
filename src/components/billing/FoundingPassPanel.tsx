@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { startFoundingCheckout } from '@/app/billing/founding-actions';
 import { FOUNDING_OFFERS } from '@/lib/launch-offers';
 import { FOUNDING_TERMS_COPY } from '@/lib/basic/founding';
+import { isProductionRuntime } from '@/lib/runtime';
 
 export default function FoundingPassPanel({
   signedIn,
@@ -13,6 +14,7 @@ export default function FoundingPassPanel({
   earlyAccess,
   notice,
   checkoutReady,
+  purchasesBlocked = false,
 }: {
   signedIn: boolean;
   active: boolean;
@@ -20,6 +22,7 @@ export default function FoundingPassPanel({
   earlyAccess: boolean;
   notice: 'processing' | 'canceled' | null;
   checkoutReady: boolean;
+  purchasesBlocked?: boolean;
 }) {
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -27,7 +30,9 @@ export default function FoundingPassPanel({
 
   return (
     <section className="rounded-2xl border border-white/15 bg-white/5 p-6 sm:p-8">
-      <p className="text-xs font-bold uppercase tracking-wide text-gold-400">Stripe test mode · no real charges</p>
+      <p className="text-xs font-bold uppercase tracking-wide text-gold-400">
+        {purchasesBlocked || isProductionRuntime() ? 'Founding access' : 'Stripe test mode · no real charges'}
+      </p>
       <h2 className="mt-3 text-2xl font-extrabold">CQ Basic Founding Pass</h2>
       {active ? (
         <div className="mt-4 space-y-3">
@@ -51,7 +56,10 @@ export default function FoundingPassPanel({
               Checkout was canceled. No access was granted.
             </p>
           ) : null}
-          {signedIn ? (
+          {signedIn && purchasesBlocked ? (
+            <p className="text-sm text-white/75">Purchases are not available for this account.</p>
+          ) : null}
+          {signedIn && !purchasesBlocked ? (
             <button
               type="button"
               disabled={pending || !checkoutReady}
@@ -72,7 +80,7 @@ export default function FoundingPassPanel({
               {pending ? 'Opening checkout…' : `Get Founding Basic — $${offer.amount}`}
             </button>
           ) : null}
-          {signedIn && !checkoutReady ? (
+          {signedIn && !checkoutReady && !purchasesBlocked ? (
             <p className="text-sm text-white/70">Test checkout is not configured. No payment can start and no access has been granted.</p>
           ) : null}
           {!signedIn ? (

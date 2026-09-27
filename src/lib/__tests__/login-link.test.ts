@@ -156,6 +156,14 @@ describe('login email delivery', () => {
         redirectTo: '/settings',
         production: true,
       })
-    ).toBe('https://www.joincampusquest.com/auth/callback?next=%2Fsettings');
+    ).toBeNull();
+    expect(
+      loginCallbackUrl({
+        siteUrl: 'https://joincampusquest.com',
+        origin: 'http://localhost:43917',
+        redirectTo: '/settings',
+        production: true,
+      })
+    ).toBe('https://joincampusquest.com/auth/callback?next=%2Fsettings');
   });
 });

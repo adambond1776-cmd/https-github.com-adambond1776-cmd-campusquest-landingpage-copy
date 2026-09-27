@@ -56,4 +56,14 @@ describe('founding checkout duplicate protection', () => {
     expect(stripeRetrieve).toHaveBeenCalledOnce();
     expect(stripeCreate).not.toHaveBeenCalled();
   });
+
+  it('does not create a Checkout Session for the demo account', async () => {
+    enableLocalCheckout();
+    loadOwnBasicEntitlement.mockResolvedValue({ ...ACTIVE, active: false, earlyAccess: false });
+    await expect(createFoundingCheckout('user-1', 'demo@campusquestapp.com')).rejects.toThrow(
+      'Founding checkout is not available for this account.',
+    );
+    expect(stripeRetrieve).not.toHaveBeenCalled();
+    expect(stripeCreate).not.toHaveBeenCalled();
+  });
 });

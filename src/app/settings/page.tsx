@@ -11,6 +11,7 @@ import LogoutButton from '@/components/LogoutButton';
 import { ageStore } from '@/lib/age-store';
 import { guardianConsentActive } from '@/lib/age';
 import { redirectIfCampusEmailUnverified } from '@/lib/gate';
+import { isDemoAccountEmail } from '@/lib/account/demo-account';
 import { signedInUser } from '@/lib/session';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { PLANS } from '@/lib/pricing';
@@ -52,7 +53,7 @@ export default async function SettingsPage() {
           </p>
           {(billingTestEnabled() || billingDemoEnabled()) && (
             <Link href="/billing" className="mt-6 inline-block rounded-xl border border-gold-400/40 px-5 py-3 text-sm font-semibold text-gold-400">
-              CQ Basic founding pass · test mode, no real charges
+              {isDemoAccountEmail(user?.email) ? 'Your CampusQuest plan' : 'CQ Basic founding pass · test mode, no real charges'}
             </Link>
           )}
 
@@ -96,7 +97,7 @@ export default async function SettingsPage() {
                     event directory stay free.
                   </p>
                 )}
-                {!isProductionRuntime() ? <LocalBasicGrant /> : null}
+                {!isProductionRuntime() && !isDemoAccountEmail(user.email) ? <LocalBasicGrant /> : null}
               </section>
 
               <section className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8">
@@ -139,7 +140,7 @@ export default async function SettingsPage() {
               </div>
 
               <div className="mt-6">
-                <DeleteAccount />
+                {isDemoAccountEmail(user.email) ? null : <DeleteAccount />}
               </div>
 
               <p className="mt-6 text-center text-sm text-white/40">

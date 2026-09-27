@@ -28,6 +28,14 @@ export function publicOrigin(): string | undefined {
 
 export const LOCAL_DEV_ORIGIN = 'http://localhost:43917';
 
+/** Production auth links use this origin. www and localhost are not accepted. */
+export const PRODUCTION_SITE_ORIGIN = 'https://joincampusquest.com';
+
+export function productionAuthOrigin(siteUrl: string | undefined): string | null {
+  const origin = siteUrl?.trim().replace(/\/$/, '') ?? '';
+  return origin === PRODUCTION_SITE_ORIGIN ? PRODUCTION_SITE_ORIGIN : null;
+}
+
 /**
  * Social profiles, rendered only when configured.
  *

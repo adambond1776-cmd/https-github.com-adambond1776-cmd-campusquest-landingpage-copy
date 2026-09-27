@@ -11,7 +11,7 @@ import FoundingBasicPurchaseButton from '@/components/billing/FoundingBasicPurch
 import { foundingLocalCheckoutConfigured } from '@/lib/basic/founding';
 import { isProductionRuntime } from '@/lib/runtime';
 
-export default function Pricing({ basicActive = false }: { basicActive?: boolean }) {
+export default function Pricing({ basicActive = false, purchasesBlocked = false }: { basicActive?: boolean; purchasesBlocked?: boolean }) {
   const { student, club } = FOUNDING_OFFERS;
   const basicCheckoutOpen = foundingLocalCheckoutConfigured();
   const offers = [
@@ -92,6 +92,10 @@ export default function Pricing({ basicActive = false }: { basicActive?: boolean
                         <p className="rounded-xl bg-gold-400 px-4 py-3 text-sm font-bold text-brand-950">Founding Basic active</p>
                         <Link href="/billing" className="inline-flex min-h-11 items-center text-sm font-bold text-gold-400 underline underline-offset-2">Manage access</Link>
                       </div>
+                    ) : purchasesBlocked ? (
+                      <p className="rounded-xl border border-white/25 px-4 py-3 text-center text-sm font-semibold text-white/80">
+                        Purchases are not available for this account.
+                      </p>
                     ) : basicCheckoutOpen ? (
                       <FoundingBasicPurchaseButton amount={student.amount} />
                     ) : (
