@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { ArrowRight, Menu, X } from 'lucide-react';
 import { BrandLockup } from '@/components/Logo';
 import LogoutButton from '@/components/LogoutButton';
+import { signedInAccountLinks } from '@/lib/account/admin-access';
+import { adminNavState } from '@/lib/account/admin-nav';
 import { getCurrentUser, type CurrentUser } from '@/lib/auth';
 import { HERO_NAV_SELECTOR, heroCoversNavbar } from '@/lib/nav-hero';
 
@@ -18,6 +20,7 @@ export default function Navbar({
   const [overHero, setOverHero] = useState(appearance !== 'light');
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<CurrentUser | null>(null);
+  const [admin, setAdmin] = useState(false);
 
   const onDark = appearance === 'dark' || (appearance === 'auto' && overHero);
 
@@ -68,6 +71,9 @@ export default function Navbar({
     getCurrentUser().then((resolved) => {
       if (active) setUser(resolved);
     });
+    adminNavState().then((state) => {
+      if (active) setAdmin(state.admin);
+    });
     return () => {
       active = false;
     };
@@ -99,6 +105,7 @@ export default function Navbar({
   const ghostButtonClass = onDark
     ? 'border-white/20 text-white hover:bg-white/10'
     : 'border-ink/15 text-ink hover:bg-cream-100';
+  const accountLinks = signedInAccountLinks(Boolean(user) && admin);
 
   return (
     <header
@@ -133,18 +140,15 @@ export default function Navbar({
           <div className="hidden xl:flex items-center gap-2">
             {user ? (
               <>
-                <Link
-                  href="/saved"
-                  className={`text-sm font-semibold motion-safe:transition-colors motion-safe:duration-300 px-3 py-2 ${linkClass}`}
-                >
-                  Saved
-                </Link>
-                <Link
-                  href="/settings"
-                  className={`text-sm font-semibold motion-safe:transition-colors motion-safe:duration-300 px-3 py-2 ${linkClass}`}
-                >
-                  Account
-                </Link>
+                {accountLinks.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`text-sm font-semibold motion-safe:transition-colors motion-safe:duration-300 px-3 py-2 ${linkClass}`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
                 <LogoutButton
                   className={`text-sm font-semibold motion-safe:transition-colors motion-safe:duration-300 px-3 py-2 ${linkClass}`}
                 />
@@ -200,20 +204,16 @@ export default function Navbar({
               <div className="flex flex-col gap-3 mt-4 px-2">
                 {user ? (
                   <>
-                    <Link
-                      href="/saved"
-                      onClick={() => setOpen(false)}
-                      className={`inline-flex items-center justify-center rounded-xl border px-6 py-3.5 text-sm font-semibold transition-colors ${ghostButtonClass}`}
-                    >
-                      Saved
-                    </Link>
-                    <Link
-                      href="/settings"
-                      onClick={() => setOpen(false)}
-                      className={`inline-flex items-center justify-center rounded-xl border px-6 py-3.5 text-sm font-semibold transition-colors ${ghostButtonClass}`}
-                    >
-                      Account
-                    </Link>
+                    {accountLinks.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setOpen(false)}
+                        className={`inline-flex items-center justify-center rounded-xl border px-6 py-3.5 text-sm font-semibold transition-colors ${ghostButtonClass}`}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
                     <LogoutButton className="inline-flex items-center justify-center rounded-full bg-brand-500 px-6 py-3.5 text-sm font-semibold text-white" />
                   </>
                 ) : (

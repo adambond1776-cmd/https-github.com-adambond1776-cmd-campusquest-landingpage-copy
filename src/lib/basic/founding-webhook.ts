@@ -2,17 +2,12 @@ import Stripe from 'stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { acceptFoundingCheckout, foundingBillingConfig, foundingWebhookSecret } from '@/lib/basic/founding';
 import { factsFromStripe, foundingStripe } from '@/lib/basic/founding-checkout';
+import { handleFoundingClubEvent, isFoundingClubEvent } from '@/lib/clubs/founding-club-webhook';
 
 const HANDLED = new Set(['checkout.session.completed', 'checkout.session.async_payment_succeeded']);
 const FAILED = new Set(['checkout.session.async_payment_failed', 'checkout.session.expired']);
 
 export async function handleFoundingWebhook(request: Request): Promise<Response> {
-  let config: ReturnType<typeof foundingBillingConfig>;
-  try {
-    config = foundingBillingConfig();
-  } catch {
-    return Response.json({ error: 'Founding checkout is not configured.' }, { status: 503 });
-  }
   const secret = foundingWebhookSecret();
   if (!secret) return Response.json({ error: 'Founding webhook is not configured.' }, { status: 503 });
   const signature = request.headers.get('stripe-signature');
@@ -25,6 +20,14 @@ export async function handleFoundingWebhook(request: Request): Promise<Response>
     return Response.json({ error: 'Invalid webhook signature.' }, { status: 400 });
   }
   if (event.livemode !== false) return Response.json({ error: 'Live events are refused.' }, { status: 400 });
+  if (isFoundingClubEvent(event)) return handleFoundingClubEvent(event);
+
+  let config: ReturnType<typeof foundingBillingConfig>;
+  try {
+    config = foundingBillingConfig();
+  } catch {
+    return Response.json({ error: 'Founding checkout is not configured.' }, { status: 503 });
+  }
   if (!HANDLED.has(event.type) && !FAILED.has(event.type)) return Response.json({ received: true });
 
   const sessionId = sessionIdFromEvent(event);

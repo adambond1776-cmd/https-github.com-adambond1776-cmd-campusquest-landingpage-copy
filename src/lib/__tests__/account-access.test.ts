@@ -99,6 +99,47 @@ describe('account access enforcement', () => {
     await expect(redirectIfCampusEmailUnverified()).rejects.toThrow('REDIRECT /signup?verify=1');
   });
 
+  it('does not send an allowlisted admin into the student verification gate', async () => {
+    vi.stubEnv('GM_ADMIN_EMAILS', 'campusquest@campusquestapp.com');
+    getUser.mockResolvedValue({
+      data: {
+        user: {
+          id: 'admin',
+          email: 'campusquest@campusquestapp.com',
+          user_metadata: {},
+        },
+      },
+      error: null,
+    });
+    maybeSingle.mockResolvedValue({
+      data: { id: 'admin', campus_email_verified_at: null },
+      error: null,
+    });
+    ageGet.mockResolvedValue(null);
+    const { redirectIfCampusEmailUnverified } = await import('@/lib/gate');
+    await expect(redirectIfCampusEmailUnverified('/welcome')).resolves.toBeUndefined();
+  });
+
+  it('still sends an unverified student into campus verification when an admin allowlist exists', async () => {
+    vi.stubEnv('GM_ADMIN_EMAILS', 'campusquest@campusquestapp.com');
+    getUser.mockResolvedValue({
+      data: {
+        user: {
+          id: 'me',
+          email: 'ram@uri.edu',
+          user_metadata: { role: 'admin', campus_email_verified_at: '2026-09-01T00:00:00.000Z' },
+        },
+      },
+      error: null,
+    });
+    maybeSingle.mockResolvedValue({
+      data: { id: 'me', campus_email_verified_at: null },
+      error: null,
+    });
+    const { redirectIfCampusEmailUnverified } = await import('@/lib/gate');
+    await expect(redirectIfCampusEmailUnverified()).rejects.toThrow('REDIRECT /signup?verify=1');
+  });
+
   it('does not treat a missing age record as verified adulthood', async () => {
     getUser.mockResolvedValue({
       data: { user: { id: 'me', email: 'ram@uri.edu', user_metadata: {} } },

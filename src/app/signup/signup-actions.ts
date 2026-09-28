@@ -16,7 +16,7 @@ import {
   sendCampusEmailCode,
   verifyCampusEmailCode,
 } from '@/lib/email-verification-service';
-import { persistConfigured, alertsConfigured } from '@/lib/env';
+import { adminEmails, persistConfigured, alertsConfigured } from '@/lib/env';
 import { AUTH_UNCONFIGURED_MESSAGE, isProductionRuntime } from '@/lib/runtime';
 import {
   classifySignupError,
@@ -31,6 +31,12 @@ import { validateEmail } from '@/lib/validation';
 import { validateInterestProfile, validateInterests } from '@/lib/interests';
 
 export type { SignupStartInput, SignupStartResult, VerifyCodeResult };
+
+function mayVerifyExistingEmail(email: string): boolean {
+  if (!studentSignupEmailRejection(email)) return true;
+  const normalized = normalizeEmail(email);
+  return adminEmails().some((entry) => normalizeEmail(entry) === normalized);
+}
 
 function asVerificationMessage(error: unknown): string {
   if (error instanceof EmailVerificationError) return error.message;
@@ -262,8 +268,9 @@ export async function startExistingAccountVerification(): Promise<
       return { ok: true, alreadyVerified: true, emailMasked: maskCampusEmail(session.email) };
     }
 
-    const domainError = studentSignupEmailRejection(session.email);
-    if (domainError) return { ok: false, message: domainError };
+    if (!mayVerifyExistingEmail(session.email)) {
+      return { ok: false, message: studentSignupEmailRejection(session.email) ?? CAMPUS_EMAIL_USER_MESSAGES.sendFailed };
+    }
 
     if (!persistConfigured()) {
       if (isProductionRuntime()) return { ok: false, message: AUTH_UNCONFIGURED_MESSAGE };

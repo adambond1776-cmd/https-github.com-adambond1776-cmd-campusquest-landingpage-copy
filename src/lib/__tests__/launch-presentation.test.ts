@@ -47,7 +47,8 @@ describe('founding offer presentation, not payment configuration', () => {
 
   it('shows a disabled Basic preview and an unavailable club offer', () => {
     const html = renderToStaticMarkup(createElement(Pricing));
-    expect(html.match(/Not yet available to purchase/g)).toHaveLength(1);
+    expect(html).toContain('Sign in to represent a club');
+    expect(html).not.toContain('Not yet available to purchase');
     expect(html).toContain('Test checkout not enabled');
     expect(html).toContain('disabled=""');
     expect(html).toContain('Save events, clubs, and organizations');
@@ -91,7 +92,8 @@ describe('founding offer presentation, not payment configuration', () => {
     expect(html).toContain('href="/billing"');
     expect(html).not.toContain('Get Founding Basic');
     expect(html).toContain('Personalized club and organization recommendations');
-    expect(html.match(/Not yet available to purchase/g)).toHaveLength(1);
+    expect(html).toContain('Sign in to represent a club');
+    expect(html).not.toContain('Not yet available to purchase');
   });
 
   it('keeps the production purchase closed for a user without active Basic', () => {
@@ -112,7 +114,8 @@ describe('founding offer presentation, not payment configuration', () => {
     expect(html).toContain('Stripe test mode on this local site');
     expect(html).not.toContain('Preview only. Paid access is not open yet');
     expect(html).not.toContain('Test checkout not enabled');
-    expect(html.match(/Not yet available to purchase/g)).toHaveLength(1);
+    expect(html).toContain('Sign in to represent a club');
+    expect(html).not.toContain('Not yet available to purchase');
     expect(html).not.toContain('href="/billing');
     expect(html).not.toContain('mode:"subscription"');
   });
@@ -203,8 +206,15 @@ describe('bounded sponsor placement', () => {
 });
 
 describe('honest contact availability', () => {
-  it.each(['', 'not-an-email', 'hello@example.com?bcc=someone@example.com'])(
-    'does not send users to an unconfigured or invalid contact: %s', (value) => {
+  it('uses support@campusquestapp.com when no partnership override is set', () => {
+    vi.stubEnv('CQ_PARTNERSHIP_EMAIL', '');
+    const html = renderToStaticMarkup(createElement(LaunchContact, { subject: 'Feedback', label: 'Draft email' }));
+    expect(html).toContain('mailto:support@campusquestapp.com?subject=Feedback');
+    expect(html).not.toContain(['partners', '@campusquestapp.com'].join(''));
+  });
+
+  it.each(['not-an-email', 'hello@example.com?bcc=someone@example.com'])(
+    'does not send users to an invalid contact: %s', (value) => {
       vi.stubEnv('CQ_PARTNERSHIP_EMAIL', value);
       const html = renderToStaticMarkup(createElement(LaunchContact, { subject: 'Feedback', label: 'Draft email' }));
       expect(html.replace(/\s+/g, ' ')).toContain('Nothing has been submitted');
@@ -212,7 +222,7 @@ describe('honest contact availability', () => {
     },
   );
 
-  it('opens a draft only when an explicit public mailbox is configured', () => {
+  it('opens a draft to an explicit public mailbox when one is configured', () => {
     vi.stubEnv('CQ_PARTNERSHIP_EMAIL', 'launch@example.com');
     const html = renderToStaticMarkup(createElement(LaunchContact, { subject: 'Feedback & ideas', label: 'Draft email' }));
     expect(html).toContain('mailto:launch@example.com?subject=Feedback%20%26%20ideas');

@@ -144,7 +144,7 @@ that other campuses are not populated yet.
 | `CQ_LEGAL_ENTITY` | Defaults to `CampusQuest, Inc.` Change only if that is wrong |
 | `CQ_LEGAL_ADDRESS` | A real registered postal address. **Missing today** |
 | `CQ_LEGAL_REVIEWED` | Set to `true` only once a licensed attorney has actually read `/privacy` and `/terms` |
-| `CQ_PARTNERSHIP_EMAIL` | Otherwise `/institutions` shows a placeholder address |
+| `CQ_PARTNERSHIP_EMAIL` | Optional. Unset, `/institutions` and help mail use `support@campusquestapp.com` |
 | `CQ_PRIVACY_EMAIL` | Data and deletion requests. Falls back to the partnership address |
 
 `/privacy` and `/terms` display a visible provisional banner until both the

@@ -430,8 +430,8 @@ optional and documented there. The short version:
 | `RESEND_API_KEY` | Email is logged instead of sent |
 | `CRON_SECRET` | The retention endpoint refuses to run at all, and correction emails arrive without their one-click resolve links |
 | `GM_ALERT_EMAIL` | Alerts go to the `gm-alerts` group by default |
-| `GM_ADMIN_EMAILS` | `/admin/genius-mining` returns 404 in production |
-| `CQ_PARTNERSHIP_EMAIL` | `/institutions` shows the `partners@campusquestapp.com` placeholder |
+| `GM_ADMIN_EMAILS` | `/admin` and the operator tools under it return 404 in production |
+| `CQ_PARTNERSHIP_EMAIL` | Institutional and support mail uses `support@campusquestapp.com` |
 | `CQ_LEGAL_ENTITY`, `CQ_LEGAL_ADDRESS` | Falls back to `CampusQuest, Inc.` with no postal address, which keeps the provisional banner up |
 | `CQ_LEGAL_REVIEWED` | The provisional banner stays up. Set to `true` only once counsel has signed off |
 | `CQ_PRIVACY_EMAIL` | Data requests fall back to `CQ_PARTNERSHIP_EMAIL` |
@@ -673,5 +673,5 @@ Outstanding:
 - The URInvolved pathway export. Seven of eight working words are below the
   coverage gate, so recommendations stay off.
 - Legal review of the consent copy, and a research consent that does not exist yet.
-- `CQ_PARTNERSHIP_EMAIL` — the institutional page currently shows a placeholder
-  address.
+- `CQ_PARTNERSHIP_EMAIL` — optional override. Unset, institutional and help mail
+  uses `support@campusquestapp.com`.

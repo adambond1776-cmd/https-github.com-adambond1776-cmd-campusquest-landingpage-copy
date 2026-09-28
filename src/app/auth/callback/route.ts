@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
+import { adminPostLoginPath, isAllowlistedAdminEmail } from '@/lib/account/admin-access';
 import { accountPrivileges } from '@/lib/account/authorization';
 import { loadAccountForSessionUser } from '@/lib/account/profile';
+import { adminEmails } from '@/lib/env';
 import { campusVerificationPath } from '@/lib/gate';
 import { safeReturnPath } from '@/lib/return-path';
 import { createClient } from '@/lib/supabase/server';
@@ -36,9 +38,11 @@ export async function GET(request: Request) {
   const metadata = (exchanged.data.user.user_metadata ?? {}) as Record<string, unknown>;
   const profile = await loadAccountForSessionUser(supabase, exchanged.data.user.id);
   const privileges = accountPrivileges(profile, metadata);
-  if (!privileges.verified) {
+  const admin = isAllowlistedAdminEmail(exchanged.data.user.email, adminEmails());
+  if (!privileges.verified && !admin) {
     return NextResponse.redirect(new URL(campusVerificationPath(next), origin));
   }
 
-  return NextResponse.redirect(new URL(next, origin));
+  const destination = adminPostLoginPath({ admin, resolvedNext: next });
+  return NextResponse.redirect(new URL(destination, origin));
 }

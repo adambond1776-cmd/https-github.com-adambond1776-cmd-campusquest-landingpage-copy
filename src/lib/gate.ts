@@ -1,7 +1,8 @@
+import { isAllowlistedAdminEmail } from '@/lib/account/admin-access';
 import { ageStore } from '@/lib/age-store';
 import { allows, type AccessDecision, type AgeRecord, type Capability } from '@/lib/age';
 import { sessionPrivileges } from '@/lib/session';
-import { supabaseConfigured } from '@/lib/env';
+import { adminEmails, supabaseConfigured } from '@/lib/env';
 import { isProductionRuntime } from '@/lib/runtime';
 import { safeReturnPath } from '@/lib/return-path';
 import { signedInEmail } from '@/lib/session';
@@ -23,7 +24,11 @@ export function campusVerificationPath(returnTo?: string | null): string {
  */
 export async function redirectIfCampusEmailUnverified(returnTo?: string): Promise<void> {
   const access = await sessionPrivileges();
-  if (access.state === 'signed-in' && !access.privileges.verified) {
+  if (access.state !== 'signed-in') return;
+  // Allowlisted operators are not students. Age, URI verification, and onboarding
+  // stay required for every other account.
+  if (isAllowlistedAdminEmail(access.email, adminEmails())) return;
+  if (!access.privileges.verified) {
     redirect(campusVerificationPath(returnTo));
   }
 }

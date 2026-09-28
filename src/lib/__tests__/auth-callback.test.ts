@@ -39,6 +39,60 @@ describe('login callback', () => {
     expect(verifyOtp).toHaveBeenCalledWith({ token_hash: 'hashed-token', type: 'magiclink' });
   });
 
+  it('sends an unverified student to campus verification', async () => {
+    vi.stubEnv('GM_ADMIN_EMAILS', 'campusquest@campusquestapp.com');
+    createClient.mockResolvedValue({
+      auth: {
+        verifyOtp: vi.fn(async () => ({
+          data: { user: { id: 'student-1', email: 'ram@uri.edu', user_metadata: { role: 'admin' } } },
+          error: null,
+        })),
+      },
+    });
+    loadAccountForSessionUser.mockResolvedValue({
+      userId: 'student-1',
+      campusEmailVerifiedAt: null,
+    });
+
+    const { GET } = await import('@/app/auth/callback/route');
+    const response = await GET(
+      new Request('http://localhost:43917/auth/callback?token_hash=hashed-token&type=magiclink&next=%2Fwelcome')
+    );
+
+    expect(response.headers.get('location')).toBe(
+      'http://localhost:43917/signup?verify=1&next=%2Fwelcome'
+    );
+  });
+
+  it('sends the allowlisted admin to /admin instead of student onboarding', async () => {
+    vi.stubEnv('GM_ADMIN_EMAILS', 'campusquest@campusquestapp.com');
+    createClient.mockResolvedValue({
+      auth: {
+        verifyOtp: vi.fn(async () => ({
+          data: {
+            user: {
+              id: 'admin-1',
+              email: 'campusquest@campusquestapp.com',
+              user_metadata: {},
+            },
+          },
+          error: null,
+        })),
+      },
+    });
+    loadAccountForSessionUser.mockResolvedValue({
+      userId: 'admin-1',
+      campusEmailVerifiedAt: null,
+    });
+
+    const { GET } = await import('@/app/auth/callback/route');
+    const response = await GET(
+      new Request('http://localhost:43917/auth/callback?token_hash=hashed-token&type=magiclink&next=%2Fwelcome')
+    );
+
+    expect(response.headers.get('location')).toBe('http://localhost:43917/admin');
+  });
+
   it('sends a bad or expired link to the link-error page', async () => {
     createClient.mockResolvedValue({
       auth: {

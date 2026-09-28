@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import { BadgeCheck, CalendarDays, ExternalLink, MapPin, Trophy, Users } from 'lucide-react';
+import { isCanonicalRecordId } from '@/lib/activities/canonical';
 import ActivityBanner from './ActivityBanner';
 import SaveControl from '@/components/basic/SaveControl';
 import { savedKindForActivity } from '@/lib/basic/saved';
@@ -112,6 +114,13 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
           </a>
         ) : null}
       </div>
+      {activity.kind === 'organization' && isCanonicalRecordId(activity.id) ? (
+        <p className="mt-3 text-sm">
+          <Link href={`/clubs/represent?organization=${activity.id}`} className="font-semibold text-brand-700 underline underline-offset-2">
+            Represent this organization?
+          </Link>
+        </p>
+      ) : null}
       {savedKindForActivity(activity) ? (
         <div className="mt-3">
           <SaveControl activity={activity} />

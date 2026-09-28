@@ -281,6 +281,55 @@ describe('existing account verification', () => {
     expect(createPendingAuthUser).not.toHaveBeenCalled();
   });
 
+  it('does not send a code when the signed-in email is neither a URI address nor an admin', async () => {
+    vi.stubEnv('GM_ADMIN_EMAILS', 'owner@campusquestapp.com');
+    sessionPrivileges.mockResolvedValue({
+      state: 'signed-in',
+      userId: 'user-1',
+      email: 'student@gmail.com',
+      privileges: { verified: false, plan: 'free' },
+    });
+    const { startExistingAccountVerification } = await import('@/app/signup/signup-actions');
+    const result = await startExistingAccountVerification();
+    expect(result.ok).toBe(false);
+    expect(sendCampusEmailCode).not.toHaveBeenCalled();
+  });
+
+  it('sends a code to the signed-in allowlisted admin email', async () => {
+    vi.stubEnv('GM_ADMIN_EMAILS', 'owner@campusquestapp.com');
+    sessionPrivileges.mockResolvedValue({
+      state: 'signed-in',
+      userId: 'user-1',
+      email: 'owner@campusquestapp.com',
+      privileges: { verified: false, plan: 'free' },
+    });
+    sendCampusEmailCode.mockResolvedValue({
+      ok: true,
+      emailMasked: 'o••@campusquestapp.com',
+      expiresInSeconds: 600,
+      resendAvailableInSeconds: 60,
+    });
+    const { startExistingAccountVerification } = await import('@/app/signup/signup-actions');
+    const result = await startExistingAccountVerification();
+    expect(result).toMatchObject({ ok: true, alreadyVerified: false, emailMasked: 'o••@campusquestapp.com' });
+    expect(sendCampusEmailCode).toHaveBeenCalledWith({ userId: 'user-1', email: 'owner@campusquestapp.com' });
+  });
+
+  it('resends a code for the same admin email', async () => {
+    findAuthUserByEmail.mockResolvedValue({ id: 'user-1' });
+    isServerAccountVerified.mockResolvedValue(false);
+    sendCampusEmailCode.mockResolvedValue({
+      ok: true,
+      emailMasked: 'o••@campusquestapp.com',
+      expiresInSeconds: 600,
+      resendAvailableInSeconds: 60,
+    });
+    const { resendCampusSignupCode } = await import('@/app/signup/signup-actions');
+    const result = await resendCampusSignupCode('owner@campusquestapp.com');
+    expect(result.ok).toBe(true);
+    expect(sendCampusEmailCode).toHaveBeenCalledWith({ userId: 'user-1', email: 'owner@campusquestapp.com' });
+  });
+
   it('recognizes an existing unverified URI account and does not create another one', async () => {
     sessionPrivileges.mockResolvedValue({
       state: 'signed-in',

@@ -137,12 +137,11 @@ export function defaultCampusId(): string {
 }
 
 /**
- * Where an administrator reading the institutional page should write.
+ * Public mailbox for institutions, support, and privacy requests.
  *
- * Configurable because the address does not exist yet. Set
- * `CQ_PARTNERSHIP_EMAIL` once the mailbox is live; until then the page shows
- * the placeholder, which is at least on a domain we control.
+ * `CQ_PARTNERSHIP_EMAIL` overrides the default. The default is the live
+ * support mailbox.
  */
 export function partnershipEmail(): string {
-  return str('CQ_PARTNERSHIP_EMAIL') ?? 'partners@campusquestapp.com';
+  return str('CQ_PARTNERSHIP_EMAIL') ?? 'support@campusquestapp.com';
 }

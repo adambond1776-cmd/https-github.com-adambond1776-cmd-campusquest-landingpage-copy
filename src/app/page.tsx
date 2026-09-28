@@ -11,11 +11,14 @@ import SponsorBanner from '@/components/SponsorBanner';
 import { ACTIVE_SPONSOR } from '@/lib/launch-offers';
 import { isDemoAccountEmail } from '@/lib/account/demo-account';
 import { loadOwnBasicEntitlement } from '@/lib/basic/store';
-import { signedInUser } from '@/lib/session';
+import { loadClubOfferState } from '@/lib/clubs/representation-store';
+import { sessionPrivileges, signedInUser } from '@/lib/session';
 
 export default async function LandingPage() {
   const user = await signedInUser();
+  const session = await sessionPrivileges();
   const basic = user ? await loadOwnBasicEntitlement() : null;
+  const clubState = await loadClubOfferState(session.state === 'signed-in' ? session.userId : null);
   return (
     <>
       <Navbar />
@@ -26,7 +29,7 @@ export default async function LandingPage() {
         <ForStudents />
         <ForOrganizations />
         <HowItWorks />
-        <Pricing basicActive={basic?.active === true} purchasesBlocked={isDemoAccountEmail(user?.email)} />
+        <Pricing basicActive={basic?.active === true} purchasesBlocked={isDemoAccountEmail(user?.email)} clubState={clubState} />
         <FinalCTA />
       </main>
       <Footer />

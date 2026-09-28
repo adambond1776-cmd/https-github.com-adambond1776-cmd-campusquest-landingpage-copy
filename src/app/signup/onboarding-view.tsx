@@ -35,7 +35,7 @@ import {
 } from '@/app/signup/signup-actions';
 import { completeOnboarding, rememberMockSignup, type Plan, type Role } from '@/lib/auth';
 import { saveAccountRole } from '@/app/signup/signup-actions';
-import { maskCampusEmail } from '@/lib/email-verification';
+import { CAMPUS_EMAIL_USER_MESSAGES } from '@/lib/email-verification';
 import { CHECKOUT_LIVE, PRICE_LOCK_COPY, STUDENT_PLANS } from '@/lib/pricing';
 import { FOUNDING_OFFERS, FOUNDING_TERMS, launchPlanDisplay } from '@/lib/launch-offers';
 import { createSubmitGate, runSignupAttempt } from '@/lib/signup-attempt';
@@ -93,20 +93,16 @@ export default function Onboarding({
   const [fieldErrors, setFieldErrors] = useState<{ email?: string }>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [pending, setPending] = useState<PendingVerification | null>(() =>
-    verifying && sessionEmail
-      ? { email: sessionEmail, emailMasked: maskCampusEmail(sessionEmail), mock: false }
-      : null
-  );
+  const [pending, setPending] = useState<PendingVerification | null>(null);
+  const [sendingCode, setSendingCode] = useState(Boolean(verifying && sessionEmail));
   const submitGate = useRef(createSubmitGate());
-  const existingCodeStarted = useRef(false);
 
-  useEffect(() => {
-    if (!verifying || !sessionEmail || existingCodeStarted.current) return;
-    existingCodeStarted.current = true;
-    let active = true;
+  const requestExistingCode = () => {
+    if (!sessionEmail) return;
+    setFormError(null);
+    setSendingCode(true);
     startExistingAccountVerification().then((result) => {
-      if (!active) return;
+      setSendingCode(false);
       if (!result.ok) {
         setFormError(result.message);
         return;
@@ -121,10 +117,21 @@ export default function Onboarding({
         mock: result.mock,
       });
     });
+  };
+
+  useEffect(() => {
+    if (!verifying || !sessionEmail) return;
+    let active = true;
+    const timer = window.setTimeout(() => {
+      if (active) requestExistingCode();
+    }, 0);
     return () => {
       active = false;
+      window.clearTimeout(timer);
     };
-  }, [verifying, sessionEmail, returnTo, router]);
+    // Request once when this signed-in verification screen opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verifying, sessionEmail]);
 
   // Clear a field's complaint as soon as it is being corrected, so stale errors
   // never sit under freshly typed input.
@@ -341,7 +348,7 @@ export default function Onboarding({
 
           {verifying && (
             <p className="mb-8 text-center text-sm text-white/60">
-              Confirm the URI email already on this account. This keeps your profile and does not create a second one.
+              Confirm the email already on this account. This keeps your profile and does not create a second one.
             </p>
           )}
 
@@ -363,6 +370,20 @@ export default function Onboarding({
                 onChange={setInterestPreferences}
               />
             )}
+            {step === 3 && verifying && !pending ? (
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-7 text-center">
+                {sendingCode ? (
+                  <p className="text-sm text-white/70">Sending your verification code…</p>
+                ) : (
+                  <>
+                    <FormAlert message={formError ?? CAMPUS_EMAIL_USER_MESSAGES.sendFailed} />
+                    <button type="button" onClick={requestExistingCode} className="btn-gold mt-5">
+                      Try again
+                    </button>
+                  </>
+                )}
+              </div>
+            ) : null}
             {step === 3 &&
               (pending ? (
                 <VerifyCode
@@ -375,7 +396,7 @@ export default function Onboarding({
                   onResend={handleResend}
                   onUseDifferentEmail={retry}
                 />
-              ) : (
+              ) : verifying ? null : (
                 <AccountStep
                   role={role}
                   plan={plan}

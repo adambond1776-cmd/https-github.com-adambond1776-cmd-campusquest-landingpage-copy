@@ -5,6 +5,7 @@ import { Loader2, ShieldCheck } from 'lucide-react';
 import FormAlert from '@/components/FormAlert';
 import TextField from '@/components/TextField';
 import { CAMPUS_EMAIL_USER_MESSAGES, isValidCampusEmailCode } from '@/lib/email-verification';
+import { emailDomain } from '@/lib/signup-email-policy';
 
 export default function VerifyCode({
   email,
@@ -60,7 +61,7 @@ export default function VerifyCode({
         setError(result.message);
         return;
       }
-      setNotice(CAMPUS_EMAIL_USER_MESSAGES.sent);
+      setNotice(emailDomain(email) === 'uri.edu' ? CAMPUS_EMAIL_USER_MESSAGES.sent : CAMPUS_EMAIL_USER_MESSAGES.orgSent);
     } finally {
       setResending(false);
     }

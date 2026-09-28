@@ -74,7 +74,7 @@ Certificates, appreciation letters, any “Founding Partner” title, qualificat
 | `/billing/demo`, `/clubs/demo` | Local workflow simulators | Development only; no proof of payments or email delivery |
 | `/contribute` | Safe contribution guidance and evidence-based resume recognition explanation | Page complete; no credential or contribution-ledger automation |
 | `/sponsors` | Bounded sponsor proposal and conditional email contact | Page complete; no payment, allocation, fulfillment or reporting system |
-| Contact links | Draft email when `CQ_PARTNERSHIP_EMAIL` is explicitly configured | Otherwise truthful unavailable state; no automatic email submission |
+| Contact links | Draft email to `support@campusquestapp.com`, or to `CQ_PARTNERSHIP_EMAIL` when that override is set | No automatic email submission |
 | `/privacy`, `/terms` | Existing legal pages and provisional-review settings | Must reconcile with new offers and confirm operator/contact details |
 | `/institutions` | Existing institutional/Level Up Rhode Island material | Separate from the commercial sponsor offer; not evidence of an institutional agreement |
 | `/method` and Genius Mining routes | Existing method explanation, consent/questionnaire/profile/advisor/admin code | Separate future work; not included in Basic/Plus founding offers or required for their initial launch |
@@ -141,7 +141,7 @@ Use `.env.example` as an inventory, not evidence that any mailbox, sender or ser
 | --- | --- | --- |
 | Supabase | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, server-only `SUPABASE_SERVICE_ROLE_KEY`; `src/lib/supabase`; `supabase/migrations` | Review schemas and row policies before migration; never expose the service-role key to the browser |
 | Account/report email | `RESEND_API_KEY`, `GM_MAIL_FROM`, `GM_ALERT_EMAIL`, `EMAIL_VERIFICATION_SECRET`; signup/email/report modules | Verify sender, recipient routing, failures and actual delivery; existing comments do not establish readiness |
-| Commercial/feedback contact | `CQ_PARTNERSHIP_EMAIL` | New pages create email drafts only; static pages require rebuilding after configuration changes |
+| Commercial/feedback contact | `support@campusquestapp.com` by default; `CQ_PARTNERSHIP_EMAIL` overrides it | Pages create email drafts only; they do not send mail from the site |
 | Test billing | `CQ_BILLING_MODE=test`, `CQ_STRIPE_TEST_*`, `CQ_BILLING_TEST_ORIGIN`; `src/lib/billing`; `/api/billing/test-webhook` | Existing Basic/Plus/club catalog is monthly and test-only; live keys are explicitly refused |
 | Test club tools | `CQ_CLUB_MODE`, `CQ_CLUB_REVIEWER_IDS`; `src/lib/clubs`; migrations `0007` and `0008` | Test notifications are previews/simulations, not outgoing club email; reviewer identity must not rely on editable user metadata |
 | Production hosting/domain | Vercel, `NEXT_PUBLIC_SITE_URL`, auth redirects and environment separation | Keep automatic Git deployment disabled until Adam approves; do not link this copy to the original project by assumption |

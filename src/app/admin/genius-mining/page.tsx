@@ -6,6 +6,7 @@ import {
   availableCampuses,
   coverageReport,
 } from '@hiddengeniuslabs/genius-mining';
+import { isAllowlistedAdminEmail } from '@/lib/account/admin-access';
 import { adminEmails, isMockEngine } from '@/lib/env';
 import { currentIdentity } from '@/lib/gm/identity';
 import { getStore } from '@/lib/gm/store';
@@ -21,12 +22,12 @@ async function assertAdmin(): Promise<void> {
   const allowed = adminEmails();
 
   // An unprotected admin view in production is not acceptable, so production
-  // requires the allowlist. Local development without one is fine.
-  if (process.env.NODE_ENV === 'production') {
-    if (allowed.length === 0) notFound();
-    const identity = await currentIdentity();
-    if (!identity?.email || !allowed.includes(identity.email)) notFound();
-  }
+  // requires the allowlist. Local development without one stays walkable.
+  // Once the allowlist is set, only those addresses can open the page.
+  if (process.env.NODE_ENV === 'production' && allowed.length === 0) notFound();
+  if (allowed.length === 0) return;
+  const identity = await currentIdentity();
+  if (!isAllowlistedAdminEmail(identity?.email, allowed)) notFound();
 }
 
 export default async function GeniusMiningAdminPage() {

@@ -1,3 +1,5 @@
+import { isAllowlistedAdminEmail } from '@/lib/account/admin-access';
+import { adminEmails } from '@/lib/env';
 import { signedInEmail } from '@/lib/session';
 import { redirectIfCampusEmailUnverified } from '@/lib/gate';
 import { safeReturnPath } from '@/lib/return-path';
@@ -17,11 +19,12 @@ export default async function SignupPage({
   const verifying = verifyFlag === '1';
   const returnTo = safeReturnPath(nextFlag);
 
+  const sessionEmail = finishing || verifying ? await signedInEmail() : null;
   if (finishing) {
+    if (isAllowlistedAdminEmail(sessionEmail, adminEmails())) redirect('/admin');
     await redirectIfCampusEmailUnverified();
   }
 
-  const sessionEmail = finishing || verifying ? await signedInEmail() : null;
   if (verifying && !sessionEmail) {
     redirect(`/login?next=${encodeURIComponent(returnTo)}`);
   }

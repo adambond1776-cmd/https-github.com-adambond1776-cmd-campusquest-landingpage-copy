@@ -27,6 +27,7 @@ import {
   isServerAccountVerified,
 } from '@/lib/account/profile';
 import type { AccountRole } from '@/lib/account/authorization';
+import { adminEmails } from '@/lib/env';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { normalizeEmail } from '@/lib/signup-email-policy';
 
@@ -61,6 +62,36 @@ export type SendCodeResult = {
   expiresInSeconds: number;
   resendAvailableInSeconds: number;
 };
+
+function recipientDomain(email: string): string {
+  const at = email.lastIndexOf('@');
+  return at > 0 ? email.slice(at + 1) : 'unknown';
+}
+
+function isAdminRecipient(email: string): boolean {
+  return adminEmails().some((entry) => normalizeEmail(entry) === email);
+}
+
+function safeMailFailure(error: unknown): { status: number | null; code: string | null; message: string } {
+  const failure = error as { message?: string; name?: string; statusCode?: number; code?: string };
+  const message = String(failure.message || 'send failed')
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[email]')
+    .replace(/\b\d{6}\b/g, '[code]')
+    .replace(/re_[A-Za-z0-9_]+/g, '[key]')
+    .slice(0, 240);
+  const code = failure.code || (failure.name && failure.name !== 'Error' ? failure.name : null);
+  return {
+    status: typeof failure.statusCode === 'number' ? failure.statusCode : null,
+    code,
+    message,
+  };
+}
+
+function logAdminCode(event: string, details: Record<string, unknown>): void {
+  const line = { event, ...details };
+  if (event === 'admin_code_send_failed') console.error('[admin-verification]', line);
+  else console.info('[admin-verification]', line);
+}
 
 function latestDispatched(rows: EmailChallengeRow[]): EmailChallengeRow | null {
   return rows.find((row) => row.dispatched_at) ?? null;
@@ -176,14 +207,31 @@ export async function sendCampusEmailCode(args: {
     invalidated_at: null,
   });
 
+  const adminRecipient = isAdminRecipient(email);
+  const domain = recipientDomain(email);
+  if (adminRecipient) {
+    logAdminCode('admin_code_created', {
+      recipientDomain: domain,
+      expiresInSeconds: CAMPUS_EMAIL_CODE_TTL_SECONDS,
+      storage: 'hashed',
+      plainStored: false,
+      previousOpenInvalidated: true,
+    });
+    logAdminCode('admin_code_send_attempt', { recipientDomain: domain });
+  }
+
   try {
     const mailer = args.mailer ?? sendCampusVerificationEmailViaResend;
     await mailer({ to: email, code });
-  } catch {
+  } catch (error) {
+    if (adminRecipient) {
+      logAdminCode('admin_code_send_failed', { recipientDomain: domain, ...safeMailFailure(error) });
+    }
     await store.invalidateOpen(args.userId, new Date().toISOString());
     throw new EmailVerificationError(CAMPUS_EMAIL_USER_MESSAGES.sendFailed, 'send_failed');
   }
 
+  if (adminRecipient) logAdminCode('admin_code_send_success', { recipientDomain: domain });
   await store.markDispatched(inserted.id, now.toISOString());
 
   return {

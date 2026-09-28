@@ -9,9 +9,57 @@ import {
 } from '@/lib/launch-offers';
 import FoundingBasicPurchaseButton from '@/components/billing/FoundingBasicPurchaseButton';
 import { foundingLocalCheckoutConfigured } from '@/lib/basic/founding';
+import { foundingClubCheckoutConfigured } from '@/lib/clubs/founding-club';
+import type { ClubOfferState } from '@/lib/clubs/representation';
 import { isProductionRuntime } from '@/lib/runtime';
 
-export default function Pricing({ basicActive = false, purchasesBlocked = false }: { basicActive?: boolean; purchasesBlocked?: boolean }) {
+function ClubOffer({
+  purchasesBlocked,
+  clubState,
+  checkoutReady,
+}: {
+  purchasesBlocked: boolean;
+  clubState: ClubOfferState;
+  checkoutReady: boolean;
+}) {
+  if (purchasesBlocked) {
+    return <p className="rounded-xl border border-cream-300 px-4 py-3 text-center text-sm font-semibold text-ink/65">Purchases are not available for this account.</p>;
+  }
+  if (clubState === 'signed-out') {
+    return <Link href="/login?next=/clubs/represent" className="btn-primary w-full">Sign in to represent a club</Link>;
+  }
+  if (clubState === 'pending') {
+    return <button type="button" disabled className="w-full cursor-not-allowed rounded-xl border border-cream-300 px-4 py-3 text-center text-sm font-semibold text-ink/65">Verification pending</button>;
+  }
+  if (clubState === 'rejected') {
+    return <Link href="/clubs/represent" className="btn-primary w-full">Request review again</Link>;
+  }
+  if (clubState === 'active') {
+    return (
+      <div className="space-y-3 text-center">
+        <p className="rounded-xl bg-brand-700 px-4 py-3 text-sm font-bold text-white">Founding Club active</p>
+        <Link href="/clubs/represent" className="inline-flex min-h-11 items-center text-sm font-bold text-brand-700 underline underline-offset-2">Manage club access</Link>
+      </div>
+    );
+  }
+  if (clubState === 'approved' && checkoutReady) {
+    return <Link href="/clubs/represent" className="btn-primary w-full">Get Founding Club — $99</Link>;
+  }
+  if (clubState === 'approved') {
+    return <button type="button" disabled className="w-full cursor-not-allowed rounded-xl border border-cream-300 px-4 py-3 text-center text-sm font-semibold text-ink/65">{isProductionRuntime() ? 'Purchase opening soon' : 'Test checkout not enabled'}</button>;
+  }
+  return <Link href="/clubs/represent" className="btn-primary w-full">Verify club representation</Link>;
+}
+
+export default function Pricing({
+  basicActive = false,
+  purchasesBlocked = false,
+  clubState = 'signed-out',
+}: {
+  basicActive?: boolean;
+  purchasesBlocked?: boolean;
+  clubState?: ClubOfferState;
+}) {
   const { student, club } = FOUNDING_OFFERS;
   const basicCheckoutOpen = foundingLocalCheckoutConfigured();
   const offers = [
@@ -108,9 +156,7 @@ export default function Pricing({ basicActive = false, purchasesBlocked = false 
                       </button>
                     )
                   ) : (
-                    <p className="rounded-xl border border-cream-300 px-4 py-3 text-center text-sm font-semibold text-ink/65">
-                      Not yet available to purchase
-                    </p>
+                    <ClubOffer purchasesBlocked={purchasesBlocked} clubState={clubState} checkoutReady={foundingClubCheckoutConfigured()} />
                   )}
                 </div>
               </article>

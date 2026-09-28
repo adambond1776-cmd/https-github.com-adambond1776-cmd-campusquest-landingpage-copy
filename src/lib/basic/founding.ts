@@ -81,10 +81,15 @@ export function testBillingOrigin(value: string | undefined): string {
   return origin.origin;
 }
 
-export function foundingBillingConfig() {
+export function foundingTestSecret(): string {
   if (isProductionRuntime()) throw new Error('Founding checkout is closed.');
   const secret = process.env.CQ_STRIPE_TEST_SECRET_KEY?.trim();
   if (!secret?.startsWith('sk_test_')) throw new Error('A Stripe test secret key is required. Live keys are refused.');
+  return secret;
+}
+
+export function foundingBillingConfig() {
+  const secret = foundingTestSecret();
   const priceId = process.env.CQ_STRIPE_TEST_BASIC_FOUNDING_PRICE_ID?.trim();
   if (!priceId?.startsWith('price_')) throw new Error('Configure the CQ Basic founding test price.');
   return {

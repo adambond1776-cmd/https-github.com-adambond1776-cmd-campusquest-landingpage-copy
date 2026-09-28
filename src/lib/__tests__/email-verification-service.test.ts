@@ -91,6 +91,65 @@ describe('sendCampusEmailCode', () => {
     expect(rows.every((row) => row.invalidated_at)).toBe(true);
   });
 
+  it('logs admin delivery stages without the code or the full address', async () => {
+    rows.length = 0;
+    vi.stubEnv('GM_ADMIN_EMAILS', 'owner@campusquestapp.com');
+    const logged: unknown[] = [];
+    const info = vi.spyOn(console, 'info').mockImplementation((...args) => {
+      logged.push(args);
+    });
+    const error = vi.spyOn(console, 'error').mockImplementation((...args) => {
+      logged.push(args);
+    });
+    await sendCampusEmailCode({
+      userId: 'user-1',
+      email: 'owner@campusquestapp.com',
+      mailer: async () => {
+        const failure = new Error('Resend rejected owner@campusquestapp.com code 123456') as Error & {
+          statusCode: number;
+          code: string;
+        };
+        failure.statusCode = 403;
+        failure.code = 'validation_error';
+        throw failure;
+      },
+    }).catch(() => undefined);
+    const text = JSON.stringify(logged);
+    expect(text).toContain('admin_code_created');
+    expect(text).toContain('admin_code_send_attempt');
+    expect(text).toContain('admin_code_send_failed');
+    expect(text).toContain('campusquestapp.com');
+    expect(text).toContain('403');
+    expect(text).toContain('validation_error');
+    expect(text).not.toContain('123456');
+    expect(text).not.toContain('owner@campusquestapp.com');
+    expect(rows[0]?.invalidated_at).toBeTruthy();
+    info.mockRestore();
+    error.mockRestore();
+  });
+
+  it('invalidates the previous open admin code when a new one is created', async () => {
+    rows.length = 0;
+    vi.stubEnv('GM_ADMIN_EMAILS', 'owner@campusquestapp.com');
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    await sendCampusEmailCode({
+      userId: 'user-1',
+      email: 'owner@campusquestapp.com',
+      now: new Date('2026-09-27T12:00:00.000Z'),
+      mailer: async () => undefined,
+    });
+    await sendCampusEmailCode({
+      userId: 'user-1',
+      email: 'owner@campusquestapp.com',
+      now: new Date('2026-09-27T12:02:00.000Z'),
+      mailer: async () => undefined,
+    });
+    expect(rows).toHaveLength(2);
+    expect(rows.filter((row) => row.invalidated_at)).toHaveLength(1);
+    expect(rows.filter((row) => row.dispatched_at && !row.invalidated_at)).toHaveLength(1);
+    info.mockRestore();
+  });
+
   it('marks the challenge dispatched only after the mailer succeeds', async () => {
     rows.length = 0;
     const result = await sendCampusEmailCode({

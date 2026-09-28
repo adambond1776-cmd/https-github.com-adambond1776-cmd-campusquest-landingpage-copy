@@ -37,6 +37,12 @@ export async function sendCampusVerificationEmailViaResend(args: {
   });
 
   if (error) {
-    throw new Error(error.message || 'Resend rejected the verification email.');
+    const failure = new Error(error.message || 'Resend rejected the verification email.') as Error & {
+      statusCode?: number;
+      code?: string;
+    };
+    failure.statusCode = error.statusCode ?? undefined;
+    failure.code = error.name || undefined;
+    throw failure;
   }
 }
