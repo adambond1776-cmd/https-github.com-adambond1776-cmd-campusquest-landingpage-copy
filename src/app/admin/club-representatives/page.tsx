@@ -1,19 +1,34 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import AdminShell from '@/components/admin/AdminShell';
+import AdminStatusBadge from '@/components/admin/AdminStatusBadge';
+import ClaimCard from '@/components/admin/ClaimCard';
+import { claimQueueFilter, claimQueueHref, type ClaimQueueFilter } from '@/components/admin/claim-queue';
 import { adminEmails } from '@/lib/env';
 import { reviewerMayDecide } from '@/lib/clubs/representation';
-import { listPendingClaims } from '@/lib/clubs/representation-store';
+import { listPendingClaims, listRepresentativeClaims } from '@/lib/clubs/representation-store';
 import { sessionPrivileges } from '@/lib/session';
 import { decideRepresentativeClaim } from './actions';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
-  title: 'Representative review | CampusQuest',
+  title: 'Representative Claims | CampusQuest',
   robots: { index: false, follow: false },
 };
 
-export default async function ClubRepresentativeAdminPage() {
+const FILTERS: { id: ClaimQueueFilter; label: string }[] = [
+  { id: 'pending', label: 'Pending' },
+  { id: 'approved', label: 'Approved' },
+  { id: 'rejected', label: 'Rejected' },
+  { id: 'all', label: 'All' },
+];
+
+export default async function ClubRepresentativeAdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const allowed = adminEmails();
   const session = await sessionPrivileges();
   const permitted = session.state === 'signed-in' && reviewerMayDecide({
@@ -23,54 +38,56 @@ export default async function ClubRepresentativeAdminPage() {
     allowlist: allowed,
   });
   if (!permitted) notFound();
-  const claims = await listPendingClaims();
+
+  const params = await searchParams;
+  const rawStatus = Array.isArray(params.status) ? params.status[0] : params.status;
+  const filter = claimQueueFilter(rawStatus);
+  const claims = await listRepresentativeClaims(filter);
+  const pendingCount = filter === 'pending' ? claims.length : (await listPendingClaims()).length;
 
   return (
-    <main className="min-h-screen bg-cream-50 px-5 py-12 text-ink">
-      <div className="mx-auto max-w-3xl">
-        <p className="eyebrow">Admin</p>
-        <Link href="/admin" className="mt-3 inline-block text-sm font-semibold text-brand-600">
-          Admin dashboard
-        </Link>
-        <h1 className="mt-3 text-3xl font-extrabold">Representative claims</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink/70">
-          Approve only when the person is an authorized representative. A payment does not grant this status.
-          Useful evidence includes the official URI listing, a public officer listing, an organization email, or confirmation from a verified representative.
+    <AdminShell current="claims">
+      <p className="text-xs font-bold uppercase tracking-[0.18em] text-gold-400">Admin</p>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Representative Claims</h1>
+        <AdminStatusBadge status="pending" />
+        <span className="text-sm font-semibold text-white/70">{pendingCount} pending</span>
+      </div>
+      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70">
+        Approve only when the person is an authorized representative. A payment does not grant this status.
+      </p>
+
+      <div className="mt-6 flex flex-wrap gap-2" role="navigation" aria-label="Claim status">
+        {FILTERS.map((item) => {
+          const active = item.id === filter;
+          return (
+            <Link
+              key={item.id}
+              href={claimQueueHref(item.id)}
+              aria-current={active ? 'page' : undefined}
+              className={`inline-flex min-h-11 items-center rounded-xl px-4 text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${
+                active ? 'bg-white text-brand-950' : 'bg-white/10 text-white hover:bg-white/15'
+              }`}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
+      </div>
+
+      {claims.length === 0 ? (
+        <p className="mt-8 rounded-2xl border border-white/10 bg-white/5 px-5 py-8 text-sm text-white/70">
+          {filter === 'pending' ? 'No claims are waiting.' : 'No claims in this view.'}
         </p>
-        {claims.length === 0 ? <p className="mt-8 text-sm text-ink/60">No claims are waiting.</p> : null}
-        <ul className="mt-8 space-y-4">
+      ) : (
+        <ul className="mt-6 space-y-4">
           {claims.map((claim) => (
-            <li key={claim.id} className="rounded-2xl border border-cream-300 bg-white p-5">
-              <p className="font-extrabold">{claim.organizationName}</p>
-              <dl className="mt-3 space-y-2 text-sm">
-                <div><dt className="font-semibold">Claimant</dt><dd>{claim.name} · {claim.email}</dd></div>
-                <div><dt className="font-semibold">Organization</dt><dd>{claim.organizationName}</dd></div>
-                <div><dt className="font-semibold">Requested role</dt><dd>{claim.roleTitle || 'Not provided'}</dd></div>
-                <div><dt className="font-semibold">Official email</dt><dd>{claim.officialEmail || 'Not provided'}</dd></div>
-                <div>
-                  <dt className="font-semibold">Verification URL</dt>
-                  <dd>{claim.verificationUrl?.startsWith('https://') ? <a className="break-all text-brand-700 underline" href={claim.verificationUrl} rel="noreferrer">{claim.verificationUrl}</a> : 'Not provided'}</dd>
-                </div>
-                <div><dt className="font-semibold">Submitted note</dt><dd className="whitespace-pre-wrap">{claim.note || 'Not provided'}</dd></div>
-                <div>
-                  <dt className="font-semibold">Proof attachment</dt>
-                  <dd>{claim.hasProofFile ? <a className="text-brand-700 underline" href={`/admin/club-representatives/proof?claim=${claim.id}`}>View proof</a> : 'Not provided'}</dd>
-                </div>
-                <div><dt className="font-semibold">Submitted</dt><dd>{new Date(claim.submittedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</dd></div>
-              </dl>
-              <form action={decideRepresentativeClaim} className="mt-4 space-y-3">
-                <input type="hidden" name="claim" value={claim.id} />
-                <label className="block text-sm font-semibold" htmlFor={`note-${claim.id}`}>Reason</label>
-                <textarea id={`note-${claim.id}`} name="note" maxLength={1000} className="min-h-20 w-full rounded-xl border border-cream-300 px-3 py-2 text-sm" />
-                <div className="flex gap-2">
-                  <button name="decision" value="approved" className="rounded-xl bg-brand-700 px-4 py-2 text-sm font-bold text-white">Approve</button>
-                  <button name="decision" value="rejected" className="rounded-xl border border-cream-300 px-4 py-2 text-sm font-bold">Reject</button>
-                </div>
-              </form>
+            <li key={claim.id}>
+              <ClaimCard claim={claim} action={decideRepresentativeClaim} />
             </li>
           ))}
         </ul>
-      </div>
-    </main>
+      )}
+    </AdminShell>
   );
 }

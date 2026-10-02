@@ -7,6 +7,7 @@ export type AdminDashboardItem = {
   title: string;
   detail: string;
   status: string;
+  cta: string;
 };
 
 /**
@@ -51,21 +52,26 @@ export function signedInAccountLinks(admin: boolean): { href: string; label: str
 export function adminDashboardItems(input: {
   pendingRepresentatives: number | null;
   clubReview: boolean;
+  geniusMiningBlocked?: number | null;
 }): AdminDashboardItem[] {
   const pending = input.pendingRepresentatives;
+  const blocked = input.geniusMiningBlocked;
   const items: AdminDashboardItem[] = [
     {
       href: '/admin/club-representatives',
-      title: 'Club representative requests',
+      title: 'Club Representative Requests',
       detail:
         'Review proof and approve or reject organization representative claims. A payment does not grant this status.',
       status: pending === null ? 'Open review' : pending === 0 ? 'None waiting' : `${pending} pending`,
+      cta: 'Review requests',
     },
     {
       href: '/admin/genius-mining',
-      title: 'Genius Mining',
+      title: 'Genius Mining Operations',
       detail: 'Pathway coverage and questionnaire operations for the instrument.',
-      status: 'Open',
+      status:
+        blocked == null ? 'Open' : blocked === 0 ? 'Coverage clear' : `${blocked} words short`,
+      cta: 'Open operations',
     },
   ];
   if (input.clubReview) {
@@ -74,6 +80,7 @@ export function adminDashboardItems(input: {
       title: 'Organization page review',
       detail: 'Review club pages submitted in the test organization workspace.',
       status: 'Review',
+      cta: 'Open review',
     });
   }
   return items;

@@ -26,6 +26,7 @@ export type RepresentativeClaim = {
   verificationUrl: string | null;
   note: string | null;
   hasProofFile: boolean;
+  logoUrl: string | null;
   status: ClaimStatus;
   submittedAt: string;
 };
@@ -140,16 +141,27 @@ export async function submitRepresentativeClaim(
   return { ok: false, message: 'The request could not be saved.' };
 }
 
-export async function listPendingClaims(): Promise<RepresentativeClaim[]> {
+export async function listRepresentativeClaims(
+  filter: ClaimStatus | 'all' = 'pending',
+): Promise<RepresentativeClaim[]> {
   const admin = createAdminClient();
   if (!admin) return [];
-  const claims = await admin.from(CLAIMS).select('id, user_id, organization_id, note, role_title, official_email, verification_url, proof_storage_path, status, submitted_at, contact_email').eq('status', 'pending').order('submitted_at', { ascending: true }).limit(100);
+  let query = admin
+    .from(CLAIMS)
+    .select('id, user_id, organization_id, note, role_title, official_email, verification_url, proof_storage_path, status, submitted_at, contact_email')
+    .order('submitted_at', { ascending: true })
+    .limit(100);
+  if (filter !== 'all') query = query.eq('status', filter);
+  const claims = await query;
   if (claims.error || !claims.data) return [];
   const orgIds = [...new Set(claims.data.map((row) => row.organization_id))];
   const userIds = [...new Set(claims.data.map((row) => row.user_id))];
-  const orgs = orgIds.length ? await admin.from('external_organizations').select('id, name').in('id', orgIds) : { data: [] };
+  const orgs = orgIds.length
+    ? await admin.from('external_organizations').select('id, name, logo_url').in('id', orgIds)
+    : { data: [] };
   const profiles = userIds.length ? await admin.from('profiles').select('id, display_name').in('id', userIds) : { data: [] };
   const orgName = new Map((orgs.data ?? []).map((row) => [row.id, row.name]));
+  const orgLogo = new Map((orgs.data ?? []).map((row) => [row.id, row.logo_url]));
   const person = new Map((profiles.data ?? []).map((row) => [row.id, row.display_name]));
   return claims.data.map((row) => ({
     id: row.id,
@@ -163,9 +175,14 @@ export async function listPendingClaims(): Promise<RepresentativeClaim[]> {
     verificationUrl: row.verification_url,
     note: row.note,
     hasProofFile: Boolean(row.proof_storage_path),
+    logoUrl: typeof orgLogo.get(row.organization_id) === 'string' ? String(orgLogo.get(row.organization_id)) : null,
     status: row.status,
     submittedAt: row.submitted_at,
   }));
+}
+
+export async function listPendingClaims(): Promise<RepresentativeClaim[]> {
+  return listRepresentativeClaims('pending');
 }
 
 export async function reviewRepresentativeClaim(input: {

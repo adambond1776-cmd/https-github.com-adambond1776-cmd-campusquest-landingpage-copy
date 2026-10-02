@@ -6,6 +6,7 @@ import {
   availableCampuses,
   coverageReport,
 } from '@hiddengeniuslabs/genius-mining';
+import AdminShell from '@/components/admin/AdminShell';
 import { isAllowlistedAdminEmail } from '@/lib/account/admin-access';
 import { adminEmails, isMockEngine } from '@/lib/env';
 import { currentIdentity } from '@/lib/gm/identity';
@@ -49,12 +50,15 @@ export default async function GeniusMiningAdminPage() {
   );
 
   return (
-    <div className="min-h-screen bg-cream-50">
-      <main className="mx-auto w-full max-w-4xl px-5 py-12 sm:px-8">
-        <p className="eyebrow">Admin</p>
-        <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-brand-950">
-          Genius Mining
+    <AdminShell current="genius-mining">
+      <div className="mx-auto w-full max-w-4xl">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-gold-400">Admin</p>
+        <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-white">
+          Genius Mining Operations
         </h1>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70">
+          Pathway coverage, instrument health, and retention clocks for the questionnaire.
+        </p>
 
         {isMockEngine() ? (
           <p className="mt-6 rounded-xl border border-gold-500/40 bg-gold-400/15 px-4 py-3 text-sm font-semibold text-brand-900">
@@ -64,8 +68,8 @@ export default async function GeniusMiningAdminPage() {
         ) : null}
 
         <section className="mt-10">
-          <h2 className="text-xl font-extrabold text-brand-900">Pathway coverage gate</h2>
-          <p className="mt-2 max-w-2xl text-brand-700">
+          <h2 className="text-xl font-extrabold text-white">Pathway coverage gate</h2>
+          <p className="mt-2 max-w-2xl text-white/70">
             Every working word needs at least {MIN_VERIFIED_PER_WORKING_WORD} verified activities
             before a cohort runs. A student who returns PROTECTOR and lands on an empty page has had
             a worse experience than if they had never taken the form, so this blocks launch rather
@@ -77,7 +81,7 @@ export default async function GeniusMiningAdminPage() {
             return (
               <div
                 key={campus.id}
-                className="mt-6 overflow-hidden rounded-2xl border border-cream-300 bg-white shadow-soft"
+                className="mt-6 overflow-x-auto rounded-2xl border border-cream-300 bg-white shadow-soft"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-cream-200 px-5 py-4">
                   <div>
@@ -149,8 +153,8 @@ export default async function GeniusMiningAdminPage() {
         </section>
 
         <section className="mt-12">
-          <h2 className="text-xl font-extrabold text-brand-900">Instrument health</h2>
-          <p className="mt-2 max-w-2xl text-brand-700">
+          <h2 className="text-xl font-extrabold text-white">Instrument health</h2>
+          <p className="mt-2 max-w-2xl text-white/70">
             Six tags across eight verbs means ties are common. How often D1 fails to resolve is
             instrument-design data — if it fires on most students, the tally is too thin to keep in
             the form as it stands.
@@ -189,9 +193,9 @@ export default async function GeniusMiningAdminPage() {
         </section>
 
         <section className="mt-12">
-          <h2 className="text-xl font-extrabold text-brand-900">Retention</h2>
+          <h2 className="text-xl font-extrabold text-white">Retention</h2>
           {lapsed.length === 0 ? (
-            <p className="mt-2 text-brand-700">No deletion clocks are running.</p>
+            <p className="mt-2 text-white/70">No deletion clocks are running.</p>
           ) : (
             <ul className="mt-4 space-y-2">
               {lapsed.map((record) => (
@@ -212,7 +216,7 @@ export default async function GeniusMiningAdminPage() {
           )}
         </section>
 
-        <section className="mt-12 rounded-2xl border border-cream-300 bg-white p-6 shadow-soft">
+        <section className="mt-12 overflow-x-auto rounded-2xl border border-cream-300 bg-white p-6 shadow-soft">
           <h2 className="text-lg font-extrabold text-brand-900">Still outstanding</h2>
           <ul className="mt-3 space-y-2 text-brand-700">
             <li>
@@ -226,7 +230,7 @@ export default async function GeniusMiningAdminPage() {
             <li>Legal review of the consent copy before launch.</li>
           </ul>
         </section>
-      </main>
-    </div>
+      </div>
+    </AdminShell>
   );
 }

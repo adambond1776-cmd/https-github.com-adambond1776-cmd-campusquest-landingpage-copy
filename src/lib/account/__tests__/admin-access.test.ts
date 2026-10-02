@@ -47,6 +47,8 @@ describe('admin access', () => {
     const items = adminDashboardItems({ pendingRepresentatives: 2, clubReview: false });
     const representatives = items.find((item) => item.href === '/admin/club-representatives');
     expect(representatives?.status).toBe('2 pending');
+    expect(representatives?.cta).toBe('Review requests');
+    expect(items.find((item) => item.href === '/admin/genius-mining')?.cta).toBe('Open operations');
     expect(reviewerMayDecide({
       reviewerId: 'admin-user',
       claimantId: 'student-user',
